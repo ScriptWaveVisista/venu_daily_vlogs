@@ -1,0 +1,54 @@
+---
+import { navLinks, siteConfig } from "../config/site";
+import { isConfiguredUrl, withBase } from "../utils/urls";
+import SocialLinks from "./SocialLinks.astro";
+
+const year = new Date().getFullYear();
+const socialReady =
+  isConfiguredUrl(siteConfig.youtube) || isConfiguredUrl(siteConfig.instagram);
+---
+
+<footer class="site-footer mt-20 border-t border-line bg-white">
+  <div class="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-3">
+    <div>
+      <p class="font-serif text-2xl">{siteConfig.name}</p>
+      <p class="mt-3 max-w-sm text-sm text-muted">{siteConfig.tagline}</p>
+    </div>
+    <nav aria-label="Footer">
+      <p class="text-sm font-semibold uppercase tracking-[0.16em] text-muted">Explore</p>
+      <ul class="mt-4 flex flex-col gap-2">
+        {
+          navLinks.map((link) => (
+            <li>
+              <a href={withBase(link.href)} class="text-sm hover:text-accent-deep">
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+        <li>
+          <a href={withBase("/privacy/")} class="text-sm hover:text-accent-deep">
+            Privacy
+          </a>
+        </li>
+      </ul>
+    </nav>
+    <div>
+      <p class="text-sm font-semibold uppercase tracking-[0.16em] text-muted">Watch</p>
+      {
+        socialReady ? (
+          <SocialLinks class="mt-4 flex-col items-start" />
+        ) : (
+          <p class="mt-4 text-sm text-muted">
+            Add YouTube and Instagram links in <code>src/config/site.ts</code>.
+          </p>
+        )
+      }
+    </div>
+  </div>
+  <div class="border-t border-line">
+    <p class="mx-auto max-w-6xl px-4 py-5 text-sm text-muted sm:px-6">
+      © {year} {siteConfig.name}
+    </p>
+  </div>
+</footer>

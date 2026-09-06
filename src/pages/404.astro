@@ -1,0 +1,27 @@
+---
+import { pageTitle } from "../utils/seo";
+import { withBase } from "../utils/urls";
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title={pageTitle("Page not found")}
+  description="This page could not be found on Venu Daily Vlogs."
+  noindex
+>
+  <section class="mx-auto max-w-3xl px-4 py-24 text-center sm:px-6">
+    <p class="text-sm font-semibold uppercase tracking-[0.18em] text-accent-deep">404</p>
+    <h1 class="mt-4 font-serif text-4xl sm:text-5xl">Looks like this page wandered away.</h1>
+    <p class="mt-4 text-lg text-muted">
+      The page you opened is not here. Try the homepage or browse recipes instead.
+    </p>
+    <div class="mt-8 flex flex-wrap justify-center gap-3">
+      <a href={withBase("/")} class="rounded-full bg-accent px-5 py-3 text-sm font-semibold text-white hover:bg-accent-deep">
+        Go Home
+      </a>
+      <a href={withBase("/recipes/")} class="rounded-full border border-line bg-white px-5 py-3 text-sm font-semibold hover:border-accent">
+        Browse Recipes
+      </a>
+    </div>
+  </section>
+</BaseLayout>

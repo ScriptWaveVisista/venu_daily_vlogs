@@ -1,0 +1,56 @@
+---
+import type { VlogEntry } from "../utils/content";
+import { formatDate } from "../utils/dates";
+import { withBase } from "../utils/urls";
+import SmartImage from "./SmartImage.astro";
+
+interface Props {
+  vlog: VlogEntry;
+}
+
+const { vlog } = Astro.props;
+const watchHref = vlog.data.youtubeUrl || withBase(`/vlogs/${vlog.id}/`);
+const isExternal = Boolean(vlog.data.youtubeUrl);
+---
+
+<article class="group overflow-hidden rounded-3xl border border-line bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+  <a
+    href={withBase(`/vlogs/${vlog.id}/`)}
+    class="block"
+  >
+    <div class="overflow-hidden">
+      <SmartImage
+        src={vlog.data.thumbnail}
+        alt={vlog.data.title}
+        width={1200}
+        height={675}
+        class="aspect-video w-full object-cover transition duration-500 group-hover:scale-[1.02]"
+      />
+    </div>
+    <div class="space-y-3 p-5">
+      <div class="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-accent-deep">
+        <span>{vlog.data.category}</span>
+        {vlog.data.demo && <span class="rounded-full bg-cream-deep px-2 py-0.5 text-[10px] text-ink">Demo</span>}
+      </div>
+      <h3 class="font-serif text-2xl leading-tight">{vlog.data.title}</h3>
+      <p class="line-clamp-2 text-sm text-muted">{vlog.data.description}</p>
+      <div class="flex flex-wrap gap-3 text-xs text-muted">
+        <time datetime={vlog.data.publishedDate.toISOString()}>
+          {formatDate(vlog.data.publishedDate)}
+        </time>
+        {vlog.data.location && <span>{vlog.data.location}</span>}
+      </div>
+    </div>
+  </a>
+  <div class="px-5 pb-5">
+    <a
+      href={watchHref}
+      class="text-sm font-semibold text-accent-deep hover:underline"
+      target={isExternal ? "_blank" : undefined}
+      rel={isExternal ? "noopener noreferrer" : undefined}
+    >
+      {isExternal ? "Watch" : "Read more"}
+      {isExternal && <span aria-hidden="true"> ↗</span>}
+    </a>
+  </div>
+</article>

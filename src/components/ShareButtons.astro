@@ -1,0 +1,62 @@
+---
+import { absoluteUrl } from "../utils/urls";
+
+interface Props {
+  title: string;
+  path: string;
+}
+
+const { title, path } = Astro.props;
+const shareUrl = absoluteUrl(path);
+const encodedUrl = encodeURIComponent(shareUrl);
+const encodedText = encodeURIComponent(`${title} ${shareUrl}`);
+---
+
+<div class="no-print flex flex-wrap items-center gap-3">
+  <p class="text-sm font-medium text-muted">Share</p>
+  <a
+    href={`https://wa.me/?text=${encodedText}`}
+    target="_blank"
+    rel="noopener noreferrer"
+    class="rounded-full border border-line bg-white px-3 py-1.5 text-sm hover:border-accent hover:text-accent-deep"
+  >
+    WhatsApp
+    <span class="sr-only"> (opens in a new tab)</span>
+  </a>
+  <a
+    href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`}
+    target="_blank"
+    rel="noopener noreferrer"
+    class="rounded-full border border-line bg-white px-3 py-1.5 text-sm hover:border-accent hover:text-accent-deep"
+  >
+    Facebook
+    <span class="sr-only"> (opens in a new tab)</span>
+  </a>
+  <button
+    type="button"
+    class="copy-link rounded-full border border-line bg-white px-3 py-1.5 text-sm hover:border-accent hover:text-accent-deep"
+    data-url={shareUrl}
+  >
+    Copy link
+  </button>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>(".copy-link").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const url = button.dataset.url;
+      if (!url) return;
+
+      try {
+        await navigator.clipboard.writeText(url);
+        button.textContent = "Link copied";
+      } catch {
+        button.textContent = "Copy failed";
+      }
+
+      window.setTimeout(() => {
+        button.textContent = "Copy link";
+      }, 2000);
+    });
+  });
+</script>

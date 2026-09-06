@@ -1,0 +1,32 @@
+---
+import { toSlug } from "../utils/slug";
+
+interface Props {
+  categories: string[];
+}
+
+const { categories } = Astro.props;
+---
+
+<div class="flex flex-wrap gap-2" role="group" aria-label="Filter recipes by category">
+  <button
+    type="button"
+    class="category-chip rounded-full border border-ink bg-ink px-4 py-2 text-sm font-medium text-white"
+    data-category="all"
+    aria-pressed="true"
+  >
+    All
+  </button>
+  {
+    categories.map((category) => (
+      <button
+        type="button"
+        class="category-chip rounded-full border border-line bg-white px-4 py-2 text-sm font-medium hover:border-accent"
+        data-category={toSlug(category)}
+        aria-pressed="false"
+      >
+        {category}
+      </button>
+    ))
+  }
+</div>

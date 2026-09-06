@@ -1,0 +1,13 @@
+---
+interface Props {
+  title: string;
+  message: string;
+}
+
+const { title, message } = Astro.props;
+---
+
+<div class="rounded-3xl border border-dashed border-line bg-white px-6 py-12 text-center">
+  <h2 class="font-serif text-2xl">{title}</h2>
+  <p class="mx-auto mt-3 max-w-xl text-muted">{message}</p>
+</div>

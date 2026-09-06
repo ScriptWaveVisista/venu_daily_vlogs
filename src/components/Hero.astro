@@ -1,0 +1,79 @@
+---
+import { siteConfig } from "../config/site";
+import type { HighlightItem } from "../utils/content";
+import { isConfiguredUrl, withBase } from "../utils/urls";
+import SmartImage from "./SmartImage.astro";
+import SocialLinks from "./SocialLinks.astro";
+
+interface Props {
+  latest: HighlightItem | null;
+}
+
+const { latest } = Astro.props;
+const latestHref = latest?.href ?? withBase("/recipes/");
+---
+
+<section class="relative overflow-hidden">
+  <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_#ffedd5,_transparent_42%)]"></div>
+  <div class="relative mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:py-20">
+    <div>
+      <p class="text-sm font-semibold uppercase tracking-[0.2em] text-accent-deep">
+        {siteConfig.tagline}
+      </p>
+      <h1 class="mt-4 max-w-xl font-serif text-4xl leading-tight text-balance sm:text-5xl">
+        Food, Family & Everyday Moments
+      </h1>
+      <p class="mt-5 max-w-xl text-lg text-muted">
+        Simple recipes, Telugu lifestyle videos, family moments and everyday stories from {siteConfig.name}.
+      </p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a
+          href={latestHref}
+          class="inline-flex items-center rounded-full bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accent-deep"
+        >
+          Watch Latest Video
+        </a>
+        <a
+          href={withBase("/recipes/")}
+          class="inline-flex items-center rounded-full border border-line bg-white px-5 py-3 text-sm font-semibold transition hover:border-accent"
+        >
+          Explore Recipes
+        </a>
+      </div>
+      {
+        (isConfiguredUrl(siteConfig.youtube) || isConfiguredUrl(siteConfig.instagram)) && (
+          <SocialLinks class="mt-6" />
+        )
+      }
+    </div>
+    <div class="overflow-hidden rounded-[2rem] bg-white shadow-[0_20px_60px_rgba(24,24,27,0.08)]">
+      {
+        latest ? (
+          <a href={latest.href} class="group block">
+            <div class="overflow-hidden">
+              <SmartImage
+                src={latest.thumbnail}
+                alt={latest.title}
+                width={1200}
+                height={800}
+                priority
+                class="aspect-[4/3] w-full object-cover transition duration-500 group-hover:scale-[1.02]"
+              />
+            </div>
+            <div class="p-5">
+              <p class="text-xs font-semibold uppercase tracking-[0.16em] text-accent-deep">
+                {latest.category}
+              </p>
+              <p class="mt-2 font-serif text-2xl leading-tight">{latest.title}</p>
+              <p class="mt-2 line-clamp-2 text-sm text-muted">{latest.description}</p>
+            </div>
+          </a>
+        ) : (
+          <div class="flex aspect-[4/3] items-end bg-cream-deep p-8">
+            <p class="font-serif text-2xl">New videos and recipes are on the way.</p>
+          </div>
+        )
+      }
+    </div>
+  </div>
+</section>

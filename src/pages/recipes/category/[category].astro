@@ -1,0 +1,67 @@
+---
+import EmptyState from "../../../components/EmptyState.astro";
+import RecipeCard from "../../../components/RecipeCard.astro";
+import ContentLayout from "../../../layouts/ContentLayout.astro";
+import {
+  getPublishedRecipes,
+  getRecipeCategories,
+  recipesInCategory,
+} from "../../../utils/content";
+import { pageTitle } from "../../../utils/seo";
+import { displayNameFromSlug, toSlug } from "../../../utils/slug";
+import { withBase } from "../../../utils/urls";
+
+export async function getStaticPaths() {
+  const recipes = await getPublishedRecipes();
+  const categories = getRecipeCategories(recipes);
+
+  return categories.map((category) => ({
+    params: { category: toSlug(category) },
+    props: {
+      categoryName: category,
+    },
+  }));
+}
+
+interface Props {
+  categoryName: string;
+}
+
+const { categoryName } = Astro.props;
+const slug = Astro.params.category ?? toSlug(categoryName);
+const recipes = recipesInCategory(await getPublishedRecipes(), slug);
+const label = displayNameFromSlug(slug, [categoryName]);
+---
+
+<ContentLayout
+  title={pageTitle(`${label} Recipes`)}
+  description={`${label} recipes from Venu Daily Vlogs, with simple homemade ingredients and video guides.`}
+  canonicalPath={`/recipes/category/${slug}/`}
+>
+  <header class="max-w-3xl">
+    <p class="text-sm font-semibold uppercase tracking-[0.16em] text-accent-deep">
+      <a href={withBase("/recipes/")} class="hover:underline">Recipes</a>
+    </p>
+    <h1 class="mt-3 font-serif text-4xl sm:text-5xl">{label}</h1>
+    <p class="mt-4 text-lg text-muted">
+      Homemade {label.toLowerCase()} recipes from the kitchen.
+    </p>
+  </header>
+
+  {
+    recipes.length > 0 ? (
+      <div class="mt-10 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+        {recipes.map((recipe) => (
+          <RecipeCard recipe={recipe} />
+        ))}
+      </div>
+    ) : (
+      <div class="mt-10">
+        <EmptyState
+          title="No recipes in this category yet"
+          message="New recipes are coming soon."
+        />
+      </div>
+    )
+  }
+</ContentLayout>

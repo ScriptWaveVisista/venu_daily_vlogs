@@ -1,0 +1,54 @@
+---
+import type { RecipeEntry } from "../utils/content";
+import { formatDate } from "../utils/dates";
+import { toSlug } from "../utils/slug";
+import { withBase } from "../utils/urls";
+import SmartImage from "./SmartImage.astro";
+
+interface Props {
+  recipe: RecipeEntry;
+  searchText?: string;
+}
+
+const { recipe, searchText } = Astro.props;
+const times = [recipe.data.prepTime, recipe.data.cookTime, recipe.data.totalTime].filter(Boolean);
+---
+
+<article
+  class="recipe-card group overflow-hidden rounded-3xl border border-line bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+  data-search={searchText}
+  data-category={toSlug(recipe.data.category)}
+>
+  <a href={withBase(`/recipes/${recipe.id}/`)} class="block">
+    <div class="overflow-hidden">
+      <SmartImage
+        src={recipe.data.thumbnail}
+        alt={recipe.data.title}
+        width={900}
+        height={675}
+        class="aspect-[4/3] w-full object-cover transition duration-500 group-hover:scale-[1.02]"
+      />
+    </div>
+    <div class="space-y-3 p-5">
+      <div class="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-accent-deep">
+        <span>{recipe.data.category}</span>
+        {recipe.data.demo && <span class="rounded-full bg-cream-deep px-2 py-0.5 text-[10px] text-ink">Demo</span>}
+        {recipe.data.draft && <span class="rounded-full bg-ink px-2 py-0.5 text-[10px] text-white">Draft</span>}
+      </div>
+      <h3 class="font-serif text-2xl leading-tight">{recipe.data.title}</h3>
+      {
+        recipe.data.teluguTitle && (
+          <p class="text-sm text-muted">{recipe.data.teluguTitle}</p>
+        )
+      }
+      <p class="line-clamp-2 text-sm text-muted">{recipe.data.description}</p>
+      <div class="flex flex-wrap gap-3 text-xs text-muted">
+        <time datetime={recipe.data.publishedDate.toISOString()}>
+          {formatDate(recipe.data.publishedDate)}
+        </time>
+        {times[0] && <span>{recipe.data.totalTime || recipe.data.cookTime || recipe.data.prepTime}</span>}
+        {recipe.data.servings && <span>{recipe.data.servings} servings</span>}
+      </div>
+    </div>
+  </a>
+</article>

@@ -1,0 +1,19 @@
+---
+interface Props {
+  href: string;
+  label: string;
+  count: number;
+}
+
+const { href, label, count } = Astro.props;
+---
+
+<a
+  href={href}
+  class="rounded-3xl border border-line bg-white px-5 py-6 transition hover:-translate-y-0.5 hover:border-accent hover:shadow-md"
+>
+  <p class="font-serif text-2xl">{label}</p>
+  <p class="mt-2 text-sm text-muted">
+    {count} {count === 1 ? "recipe" : "recipes"}
+  </p>
+</a>

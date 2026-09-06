@@ -1,0 +1,48 @@
+---
+import type { ShortEntry } from "../utils/content";
+import { formatDate } from "../utils/dates";
+import { withBase } from "../utils/urls";
+import SmartImage from "./SmartImage.astro";
+
+interface Props {
+  short: ShortEntry;
+}
+
+const { short } = Astro.props;
+const href = short.data.youtubeUrl || withBase("/shorts/");
+const isExternal = Boolean(short.data.youtubeUrl);
+---
+
+<article class="group overflow-hidden rounded-3xl border border-line bg-white shadow-sm">
+  <a
+    href={href}
+    target={isExternal ? "_blank" : undefined}
+    rel={isExternal ? "noopener noreferrer" : undefined}
+    class="block"
+  >
+    <div class="overflow-hidden bg-ink">
+      <SmartImage
+        src={short.data.thumbnail}
+        alt={short.data.title}
+        width={720}
+        height={1280}
+        class="aspect-[9/16] w-full object-cover transition duration-500 group-hover:scale-[1.02]"
+      />
+    </div>
+    <div class="space-y-2 p-4">
+      <p class="text-xs font-semibold uppercase tracking-[0.14em] text-accent-deep">
+        {short.data.category}
+      </p>
+      <h3 class="font-serif text-xl leading-tight">{short.data.title}</h3>
+      <time class="block text-xs text-muted" datetime={short.data.publishedDate.toISOString()}>
+        {formatDate(short.data.publishedDate)}
+      </time>
+      {isExternal && (
+        <p class="text-sm font-semibold text-accent-deep">
+          Watch on YouTube <span aria-hidden="true">↗</span>
+          <span class="sr-only"> (opens in a new tab)</span>
+        </p>
+      )}
+    </div>
+  </a>
+</article>

@@ -1,0 +1,39 @@
+---
+import { PLACEHOLDER_IMAGE, withImageFallback } from "../utils/images";
+import { withBase } from "../utils/urls";
+
+interface Props {
+  src: string;
+  alt: string;
+  width?: number;
+  height?: number;
+  priority?: boolean;
+  class?: string;
+  sizes?: string;
+}
+
+const {
+  src,
+  alt,
+  width = 1200,
+  height = 800,
+  priority = false,
+  class: className = "",
+  sizes,
+} = Astro.props;
+
+const resolvedSrc = withImageFallback(src);
+---
+
+<img
+  src={resolvedSrc}
+  alt={alt}
+  width={width}
+  height={height}
+  class={className}
+  sizes={sizes}
+  loading={priority ? "eager" : "lazy"}
+  decoding={priority ? "async" : "async"}
+  fetchpriority={priority ? "high" : "auto"}
+  onerror={`this.onerror=null;this.src='${withBase(PLACEHOLDER_IMAGE)}'`}
+/>

@@ -1,0 +1,51 @@
+---
+import { siteConfig } from "../config/site";
+import { resolveOgImage } from "../utils/seo";
+import { getCanonicalUrl } from "../utils/urls";
+
+interface Props {
+  title: string;
+  description: string;
+  image?: string;
+  type?: "website" | "article";
+  canonicalPath?: string;
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description,
+  image,
+  type = "website",
+  canonicalPath,
+  noindex = false,
+} = Astro.props;
+
+const canonical = getCanonicalUrl(canonicalPath ?? Astro.url.pathname);
+const ogImage = resolveOgImage(image);
+---
+
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+{noindex && <meta name="robots" content="noindex, nofollow" />}
+<meta property="og:type" content={type} />
+<meta property="og:site_name" content={siteConfig.name} />
+<meta property="og:locale" content={siteConfig.locale} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={ogImage} />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
+<meta name="author" content={siteConfig.author} />
+{
+  siteConfig.searchConsoleVerification && (
+    <meta
+      name="google-site-verification"
+      content={siteConfig.searchConsoleVerification}
+    />
+  )
+}
