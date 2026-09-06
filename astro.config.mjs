@@ -13,7 +13,14 @@ export default defineConfig({
   },
   integrations: [
     sitemap({
-      filter: (page) => !page.includes("/404"),
+      filter: (page) => !page.includes("/404") && !page.endsWith("/rss.xml"),
+      i18n: {
+        defaultLocale: "en",
+        locales: {
+          en: "en-IN",
+          te: "te-IN",
+        },
+      },
     }),
   ],
 });

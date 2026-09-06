@@ -1,0 +1,62 @@
+---
+import EmptyState from "../../../components/EmptyState.astro";
+import VlogCard from "../../../components/VlogCard.astro";
+import { isLocale, localeStaticPaths, t, vlogCategoryLabel } from "../../../i18n";
+import ContentLayout from "../../../layouts/ContentLayout.astro";
+import { getPublishedVlogs, getVlogCategories } from "../../../utils/content";
+import { pageTitle } from "../../../utils/seo";
+import { localePath } from "../../../utils/urls";
+
+export function getStaticPaths() {
+  return localeStaticPaths();
+}
+
+const lang = Astro.params.lang;
+if (!isLocale(lang)) throw new Error("Invalid locale");
+const locale = lang;
+const copy = t(locale);
+const vlogs = await getPublishedVlogs();
+const categories = getVlogCategories(vlogs);
+---
+
+<ContentLayout
+  title={pageTitle(copy.pages.vlogsTitle)}
+  description={copy.pages.vlogsDescription}
+  locale={locale}
+  canonicalPath={localePath(locale, "/vlogs/")}
+>
+  <header class="max-w-3xl">
+    <p class="text-sm font-semibold uppercase tracking-[0.16em] text-accent-deep">{copy.common.stories}</p>
+    <h1 class="mt-3 font-serif text-4xl sm:text-5xl">{copy.pages.vlogsTitle}</h1>
+    <p class="mt-4 text-lg text-muted">{copy.pages.vlogsDescription}</p>
+  </header>
+
+  {
+    categories.length > 0 && (
+      <div class="mt-8 flex flex-wrap gap-2">
+        {categories.map((category) => (
+          <a
+            href={localePath(locale, `/vlogs/category/${category}/`)}
+            class="rounded-full border border-line bg-white px-4 py-2 text-sm font-medium hover:border-accent"
+          >
+            {vlogCategoryLabel(category, locale)}
+          </a>
+        ))}
+      </div>
+    )
+  }
+
+  {
+    vlogs.length > 0 ? (
+      <div class="mt-10 grid gap-6 md:grid-cols-2">
+        {vlogs.map((vlog) => (
+          <VlogCard vlog={vlog} locale={locale} />
+        ))}
+      </div>
+    ) : (
+      <div class="mt-10">
+        <EmptyState title={copy.common.noVlogs} message={copy.common.noVlogsMessage} />
+      </div>
+    )
+  }
+</ContentLayout>

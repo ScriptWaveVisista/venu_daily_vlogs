@@ -1,76 +1,85 @@
 ---
-import { siteConfig } from "../config/site";
+import { t, type Locale } from "../i18n";
 import type { HighlightItem } from "../utils/content";
-import { isConfiguredUrl, withBase } from "../utils/urls";
+import { isConfiguredUrl, localePath } from "../utils/urls";
+import { siteConfig } from "../config/site";
 import SmartImage from "./SmartImage.astro";
 import SocialLinks from "./SocialLinks.astro";
 
 interface Props {
+  locale: Locale;
   latest: HighlightItem | null;
 }
 
-const { latest } = Astro.props;
-const latestHref = latest?.href ?? withBase("/recipes/");
+const { locale, latest } = Astro.props;
+const copy = t(locale);
+const latestHref = latest?.href ?? localePath(locale, "/recipes/");
+const ctaLabel = latest?.kind === "recipe" ? copy.common.viewRecipe : copy.hero.watch;
 ---
 
 <section class="relative overflow-hidden">
-  <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_#ffedd5,_transparent_42%)]"></div>
-  <div class="relative mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:py-20">
+  <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,_#ffedd5,_transparent_46%)]"></div>
+  <div class="relative mx-auto grid max-w-[1240px] items-center gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10 lg:py-10">
     <div>
-      <p class="text-sm font-semibold uppercase tracking-[0.2em] text-accent-deep">
-        {siteConfig.tagline}
+      <p class="text-xs font-semibold uppercase tracking-[0.18em] text-accent-deep sm:text-sm">
+        {copy.hero.eyebrow}
       </p>
-      <h1 class="mt-4 max-w-xl font-serif text-4xl leading-tight text-balance sm:text-5xl">
-        Food, Family & Everyday Moments
+      <h1 class="mt-3 max-w-xl font-serif text-[2.15rem] leading-[1.2] text-balance sm:text-4xl lg:text-[2.75rem]">
+        {copy.hero.title}
       </h1>
-      <p class="mt-5 max-w-xl text-lg text-muted">
-        Simple recipes, Telugu lifestyle videos, family moments and everyday stories from {siteConfig.name}.
+      <p class="mt-4 max-w-xl text-base leading-relaxed text-muted sm:text-lg">
+        {copy.hero.description}
       </p>
-      <div class="mt-8 flex flex-wrap gap-3">
+      <div class="mt-6 grid grid-cols-1 gap-3 sm:flex sm:flex-wrap">
         <a
           href={latestHref}
-          class="inline-flex items-center rounded-full bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accent-deep"
+          class="inline-flex min-h-11 items-center justify-center rounded-full bg-accent px-5 py-3 text-sm font-semibold text-white transition hover:bg-accent-deep"
         >
-          Watch Latest Video
+          {latest ? ctaLabel : copy.hero.watch}
         </a>
         <a
-          href={withBase("/recipes/")}
-          class="inline-flex items-center rounded-full border border-line bg-white px-5 py-3 text-sm font-semibold transition hover:border-accent"
+          href={localePath(locale, "/recipes/")}
+          class="inline-flex min-h-11 items-center justify-center rounded-full border border-line bg-white px-5 py-3 text-sm font-semibold transition hover:border-accent"
         >
-          Explore Recipes
+          {copy.hero.recipes}
         </a>
       </div>
       {
         (isConfiguredUrl(siteConfig.youtube) || isConfiguredUrl(siteConfig.instagram)) && (
-          <SocialLinks class="mt-6" />
+          <SocialLinks class="mt-5" />
         )
       }
     </div>
-    <div class="overflow-hidden rounded-[2rem] bg-white shadow-[0_20px_60px_rgba(24,24,27,0.08)]">
+    <div class="overflow-hidden rounded-[1.75rem] bg-white shadow-[0_16px_40px_rgba(24,24,27,0.08)]">
       {
         latest ? (
-          <a href={latest.href} class="group block">
-            <div class="overflow-hidden">
-              <SmartImage
-                src={latest.thumbnail}
-                alt={latest.title}
-                width={1200}
-                height={800}
-                priority
-                class="aspect-[4/3] w-full object-cover transition duration-500 group-hover:scale-[1.02]"
-              />
-            </div>
-            <div class="p-5">
-              <p class="text-xs font-semibold uppercase tracking-[0.16em] text-accent-deep">
+          <a href={latest.href} class="group relative block">
+            <SmartImage
+              src={latest.thumbnail}
+              alt={latest.title}
+              width={1200}
+              height={800}
+              priority
+              class="aspect-[4/3] w-full object-cover transition duration-300 group-hover:scale-[1.02] lg:max-h-[420px]"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/15 to-transparent"></div>
+            <div class="absolute inset-x-0 bottom-0 p-5 text-white">
+              <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-orange-200">
                 {latest.category}
               </p>
-              <p class="mt-2 font-serif text-2xl leading-tight">{latest.title}</p>
-              <p class="mt-2 line-clamp-2 text-sm text-muted">{latest.description}</p>
+              <p class="mt-1 font-serif text-2xl leading-tight">{latest.title}</p>
+              {latest.teluguTitle && (
+                <p class="mt-1 text-sm text-white/80">{latest.teluguTitle}</p>
+              )}
+              <p class="mt-3 inline-flex items-center gap-2 text-sm font-semibold">
+                <span class="flex h-8 w-8 items-center justify-center rounded-full bg-accent">▶</span>
+                {ctaLabel}
+              </p>
             </div>
           </a>
         ) : (
           <div class="flex aspect-[4/3] items-end bg-cream-deep p-8">
-            <p class="font-serif text-2xl">New videos and recipes are on the way.</p>
+            <p class="font-serif text-2xl">{copy.common.noRecipesMessage}</p>
           </div>
         )
       }

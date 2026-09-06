@@ -1,6 +1,5 @@
 ---
 import { siteConfig } from "../config/site";
-import { withBase } from "../utils/urls";
 
 interface Crumb {
   href: string;
@@ -25,7 +24,7 @@ const { items } = Astro.props;
               {item.label}
             </span>
           ) : (
-            <a href={withBase(item.href)} class="hover:text-accent-deep">
+            <a href={item.href} class="hover:text-accent-deep">
               {item.label}
             </a>
           )}

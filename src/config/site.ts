@@ -16,8 +16,10 @@ export const siteConfig = {
   domain: "https://scriptwavevisista.github.io",
   base: "/venu_daily_vlogs",
   author: "Venu",
-  language: "en-IN",
+  language: "en",
   locale: "en_IN",
+  defaultLanguage: "en",
+  supportedLanguages: ["en", "te"],
   youtube: "YOUR_YOUTUBE_CHANNEL_URL",
   instagram: "YOUR_INSTAGRAM_URL",
   facebook: "",
@@ -33,10 +35,10 @@ export const siteConfig = {
 export type SiteConfig = typeof siteConfig;
 
 export const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/recipes/", label: "Recipes" },
-  { href: "/vlogs/", label: "Vlogs" },
-  { href: "/shorts/", label: "Shorts" },
-  { href: "/about/", label: "About" },
-  { href: "/contact/", label: "Contact" },
+  { href: "/", key: "home" },
+  { href: "/recipes/", key: "recipes" },
+  { href: "/vlogs/", key: "vlogs" },
+  { href: "/shorts/", key: "shorts" },
+  { href: "/about/", key: "about" },
+  { href: "/contact/", key: "contact" },
 ] as const;

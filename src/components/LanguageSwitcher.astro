@@ -1,0 +1,56 @@
+---
+import { t, type Locale } from "../i18n";
+import { localePath, stripLocale } from "../utils/urls";
+
+interface Props {
+  locale: Locale;
+  compact?: boolean;
+}
+
+const { locale, compact = false } = Astro.props;
+const copy = t(locale);
+const currentPath = Astro.url.pathname;
+const rest = stripLocale(currentPath);
+const enHref = localePath("en", rest);
+const teHref = localePath("te", rest);
+---
+
+<div
+  class:list={["lang-switcher inline-flex items-center rounded-full border border-line bg-white p-0.5", compact && "text-xs"]}
+  role="group"
+  aria-label={copy.common.language}
+>
+  <a
+    href={enHref}
+    data-locale="en"
+    class:list={[
+      "rounded-full px-2.5 py-1.5 text-xs font-semibold tracking-wide transition sm:px-3",
+      locale === "en" ? "bg-ink text-white" : "text-muted hover:text-ink",
+    ]}
+    aria-current={locale === "en" ? "true" : undefined}
+  >
+    EN
+  </a>
+  <a
+    href={teHref}
+    data-locale="te"
+    class:list={[
+      "rounded-full px-2.5 py-1.5 text-xs font-semibold transition sm:px-3",
+      locale === "te" ? "bg-ink text-white" : "text-muted hover:text-ink",
+    ]}
+    aria-current={locale === "te" ? "true" : undefined}
+  >
+    తెలుగు
+  </a>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLAnchorElement>(".lang-switcher a[data-locale]").forEach((link) => {
+    link.addEventListener("click", () => {
+      const next = link.dataset.locale;
+      if (next === "en" || next === "te") {
+        localStorage.setItem("preferredLanguage", next);
+      }
+    });
+  });
+</script>

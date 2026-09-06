@@ -1,44 +1,54 @@
 ---
+import { t, vlogCategoryLabel, type Locale } from "../i18n";
 import type { VlogEntry } from "../utils/content";
+import { vlogDescription, vlogTitle } from "../utils/content";
 import { formatDate } from "../utils/dates";
-import { withBase } from "../utils/urls";
+import { getLocalizedValue } from "../i18n/localize";
+import { localePath } from "../utils/urls";
 import SmartImage from "./SmartImage.astro";
 
 interface Props {
   vlog: VlogEntry;
+  locale: Locale;
 }
 
-const { vlog } = Astro.props;
-const watchHref = vlog.data.youtubeUrl || withBase(`/vlogs/${vlog.id}/`);
+const { vlog, locale } = Astro.props;
+const copy = t(locale);
+const title = vlogTitle(vlog, locale);
+const description = vlogDescription(vlog, locale);
+const location = vlog.data.location ? getLocalizedValue(vlog.data.location, locale) : "";
+const watchHref = vlog.data.youtubeUrl || localePath(locale, `/vlogs/${vlog.id}/`);
 const isExternal = Boolean(vlog.data.youtubeUrl);
 ---
 
-<article class="group overflow-hidden rounded-3xl border border-line bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-  <a
-    href={withBase(`/vlogs/${vlog.id}/`)}
-    class="block"
-  >
-    <div class="overflow-hidden">
+<article class="group overflow-hidden rounded-3xl border border-line/80 bg-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md">
+  <a href={localePath(locale, `/vlogs/${vlog.id}/`)} class="block">
+    <div class="relative overflow-hidden">
       <SmartImage
         src={vlog.data.thumbnail}
-        alt={vlog.data.title}
+        alt={title}
         width={1200}
         height={675}
-        class="aspect-video w-full object-cover transition duration-500 group-hover:scale-[1.02]"
+        class="aspect-video w-full object-cover transition duration-300 group-hover:scale-[1.02]"
       />
+      <span class="absolute bottom-3 left-3 flex h-10 w-10 items-center justify-center rounded-full bg-accent text-white">
+        ▶
+      </span>
     </div>
     <div class="space-y-3 p-5">
-      <div class="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-accent-deep">
-        <span>{vlog.data.category}</span>
-        {vlog.data.demo && <span class="rounded-full bg-cream-deep px-2 py-0.5 text-[10px] text-ink">Demo</span>}
+      <div class="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-accent-deep">
+        <span>{vlogCategoryLabel(vlog.data.category, locale)}</span>
+        {vlog.data.demo && (
+          <span class="rounded-full bg-cream-deep px-2 py-0.5 text-[10px] text-ink">{copy.common.demo}</span>
+        )}
       </div>
-      <h3 class="font-serif text-2xl leading-tight">{vlog.data.title}</h3>
-      <p class="line-clamp-2 text-sm text-muted">{vlog.data.description}</p>
+      <h3 class="font-serif text-2xl leading-tight">{title}</h3>
+      <p class="line-clamp-2 text-sm text-muted">{description}</p>
       <div class="flex flex-wrap gap-3 text-xs text-muted">
         <time datetime={vlog.data.publishedDate.toISOString()}>
-          {formatDate(vlog.data.publishedDate)}
+          {formatDate(vlog.data.publishedDate, locale)}
         </time>
-        {vlog.data.location && <span>{vlog.data.location}</span>}
+        {location && <span>{location}</span>}
       </div>
     </div>
   </a>
@@ -49,8 +59,7 @@ const isExternal = Boolean(vlog.data.youtubeUrl);
       target={isExternal ? "_blank" : undefined}
       rel={isExternal ? "noopener noreferrer" : undefined}
     >
-      {isExternal ? "Watch" : "Read more"}
-      {isExternal && <span aria-hidden="true"> ↗</span>}
+      {isExternal ? copy.common.watchOnYoutube : copy.common.readMore}
     </a>
   </div>
 </article>

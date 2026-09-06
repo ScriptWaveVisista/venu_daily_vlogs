@@ -24,24 +24,33 @@ templates/recipe-template.md
 src/content/recipes/my-new-recipe.md
 ```
 
-The file name becomes the URL. `simple-chicken-fry.md` becomes `/recipes/simple-chicken-fry/`.
+The file name becomes the URL. `simple-chicken-fry.md` becomes `/en/recipes/simple-chicken-fry/` and `/te/recipes/simple-chicken-fry/`.
 
-4. Change these fields:
+4. Use bilingual fields. English is required. Telugu is optional and can be added later. If Telugu is missing, the Telugu page shows English.
 
 ```yaml
-title: "Simple Chicken Fry"
-teluguTitle: "సింపుల్ చికెన్ ఫ్రై"
-description: "An easy homemade chicken fry recipe."
+title:
+  en: "Simple Chicken Fry"
+  te: "సింపుల్ చికెన్ ఫ్రై"
+
+description:
+  en: "An easy homemade chicken fry recipe."
+  te: "ఇంట్లో సులభంగా చేసుకునే చికెన్ ఫ్రై."
+
 publishedDate: 2026-09-05
 thumbnail: "/images/recipes/my-recipe.jpg"
 youtubeUrl: "https://www.youtube.com/watch?v=VIDEO_ID"
 category: "Chicken"
 ingredients:
-  - item: "Chicken"
-    quantity: "500 g"
+  - quantity: "500 g"
+    en: "Chicken"
+    te: "చికెన్"
 instructions:
-  - "Clean and prepare the chicken."
+  - en: "Clean and prepare the chicken."
+    te: "చికెన్‌ను బాగా శుభ్రం చేయండి."
 ```
+
+Older files can still use `title: "Simple Chicken Fry"` plus optional `teluguTitle`.
 
 5. Save the file.
 
@@ -51,7 +60,7 @@ instructions:
 npm run dev
 ```
 
-7. Open [http://localhost:4321/recipes/](http://localhost:4321/recipes/).
+7. Open [http://localhost:4321/venu_daily_vlogs/en/recipes/](http://localhost:4321/venu_daily_vlogs/en/recipes/) and the Telugu version at `/te/recipes/`.
 
 8. Commit.
 

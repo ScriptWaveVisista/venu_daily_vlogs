@@ -1,12 +1,14 @@
 import { siteConfig } from "../config/site";
+import { defaultLocale, isLocale, otherLocale, type Locale } from "../i18n/locales";
 
 function normalizedBase(): string {
-  const raw = siteConfig.base ?? "/";
-  if (!raw || raw === "/") {
+  const raw = String(siteConfig.base ?? "/");
+  const trimmed = raw.replace(/^\/+|\/+$/g, "");
+  if (!trimmed) {
     return "";
   }
 
-  return `/${raw.replace(/^\/+|\/+$/g, "")}`;
+  return `/${trimmed}`;
 }
 
 export function getSiteOrigin(): string {
@@ -51,6 +53,40 @@ export function stripBase(pathname: string): string {
   }
 
   return pathname;
+}
+
+export function stripLocale(pathname: string): string {
+  const logical = stripBase(pathname);
+  const match = logical.match(/^\/(en|te)(?=\/|$)/);
+  if (!match) {
+    return logical || "/";
+  }
+
+  const rest = logical.slice(match[0].length);
+  return rest || "/";
+}
+
+export function getLocaleFromPath(pathname: string): Locale {
+  const logical = stripBase(pathname);
+  const match = logical.match(/^\/(en|te)(?=\/|$)/);
+  return isLocale(match?.[1]) ? match[1] : defaultLocale;
+}
+
+export function localePath(locale: Locale, path: string): string {
+  if (!path || path.startsWith("#") || isExternalHref(path)) {
+    return path;
+  }
+
+  const suffix = path === "/" ? "/" : path.startsWith("/") ? path : `/${path}`;
+  return withBase(`/${locale}${suffix === "/" ? "/" : suffix}`);
+}
+
+export function swapLocalePath(pathname: string, next: Locale): string {
+  return localePath(next, stripLocale(pathname));
+}
+
+export function alternateLocalePath(pathname: string): string {
+  return swapLocalePath(pathname, otherLocale(getLocaleFromPath(pathname)));
 }
 
 export function absoluteUrl(pathOrUrl: string): string {

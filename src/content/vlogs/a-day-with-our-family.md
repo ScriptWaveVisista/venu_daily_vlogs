@@ -1,9 +1,15 @@
 ---
-title: "A Day With Our Family"
-description: "DEMO sample. A simple family vlog example from Venu Daily Vlogs."
+title:
+  en: "A Day With Our Family"
+  te: "మా కుటుంబంతో ఒక రోజు"
+description:
+  en: "DEMO sample. A simple family vlog example from Venu Daily Vlogs."
+  te: "డెమో నమూనా. Venu Daily Vlogs నుంచి ఒక సాధారణ కుటుంబ వ్లాగ్."
 publishedDate: 2026-09-01
 category: "Family"
-location: "Hyderabad"
+location:
+  en: "Hyderabad"
+  te: "హైదరాబాద్"
 thumbnail: "/images/vlogs/family-day.jpg"
 youtubeUrl: ""
 tags:

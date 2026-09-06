@@ -1,53 +1,82 @@
 ---
 import { navLinks, siteConfig } from "../config/site";
-import { isConfiguredUrl, withBase } from "../utils/urls";
+import { t, type Locale } from "../i18n";
+import { isConfiguredUrl, localePath } from "../utils/urls";
+import LanguageSwitcher from "./LanguageSwitcher.astro";
 import SocialLinks from "./SocialLinks.astro";
 
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const copy = t(locale);
 const year = new Date().getFullYear();
 const socialReady =
   isConfiguredUrl(siteConfig.youtube) || isConfiguredUrl(siteConfig.instagram);
 ---
 
-<footer class="site-footer mt-20 border-t border-line bg-white">
-  <div class="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-3">
+<footer class="site-footer mt-16 border-t border-line bg-white sm:mt-20">
+  <div class="mx-auto grid max-w-[1240px] gap-10 px-4 py-12 sm:px-6 md:grid-cols-2 lg:grid-cols-4">
     <div>
       <p class="font-serif text-2xl">{siteConfig.name}</p>
-      <p class="mt-3 max-w-sm text-sm text-muted">{siteConfig.tagline}</p>
+      <p class="mt-3 max-w-sm text-sm leading-relaxed text-muted">{copy.footer.tagline}</p>
     </div>
     <nav aria-label="Footer">
-      <p class="text-sm font-semibold uppercase tracking-[0.16em] text-muted">Explore</p>
+      <p class="text-sm font-semibold uppercase tracking-[0.16em] text-muted">{copy.common.explore}</p>
       <ul class="mt-4 flex flex-col gap-2">
         {
-          navLinks.map((link) => (
+          navLinks.slice(0, 4).map((link) => (
             <li>
-              <a href={withBase(link.href)} class="text-sm hover:text-accent-deep">
-                {link.label}
+              <a href={localePath(locale, link.href)} class="text-sm hover:text-accent-deep">
+                {copy.nav[link.key]}
               </a>
             </li>
           ))
         }
+      </ul>
+    </nav>
+    <nav aria-label={copy.nav.about}>
+      <p class="text-sm font-semibold uppercase tracking-[0.16em] text-muted">{copy.nav.about}</p>
+      <ul class="mt-4 flex flex-col gap-2">
         <li>
-          <a href={withBase("/privacy/")} class="text-sm hover:text-accent-deep">
-            Privacy
+          <a href={localePath(locale, "/about/")} class="text-sm hover:text-accent-deep">
+            {copy.nav.about}
+          </a>
+        </li>
+        <li>
+          <a href={localePath(locale, "/contact/")} class="text-sm hover:text-accent-deep">
+            {copy.nav.contact}
+          </a>
+        </li>
+        <li>
+          <a href={localePath(locale, "/privacy/")} class="text-sm hover:text-accent-deep">
+            {copy.common.privacy}
           </a>
         </li>
       </ul>
     </nav>
-    <div>
-      <p class="text-sm font-semibold uppercase tracking-[0.16em] text-muted">Watch</p>
-      {
-        socialReady ? (
-          <SocialLinks class="mt-4 flex-col items-start" />
-        ) : (
-          <p class="mt-4 text-sm text-muted">
-            Add YouTube and Instagram links in <code>src/config/site.ts</code>.
-          </p>
-        )
-      }
+    <div class="space-y-5">
+      <div>
+        <p class="text-sm font-semibold uppercase tracking-[0.16em] text-muted">{copy.common.follow}</p>
+        {
+          socialReady ? (
+            <SocialLinks class="mt-4 flex-col items-start" />
+          ) : (
+            <p class="mt-4 text-sm text-muted">YouTube · Instagram</p>
+          )
+        }
+      </div>
+      <div>
+        <p class="mb-3 text-sm font-semibold uppercase tracking-[0.16em] text-muted">
+          {copy.common.language}
+        </p>
+        <LanguageSwitcher locale={locale} />
+      </div>
     </div>
   </div>
   <div class="border-t border-line">
-    <p class="mx-auto max-w-6xl px-4 py-5 text-sm text-muted sm:px-6">
+    <p class="mx-auto max-w-[1240px] px-4 py-5 text-sm text-muted sm:px-6">
       © {year} {siteConfig.name}
     </p>
   </div>

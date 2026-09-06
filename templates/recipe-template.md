@@ -1,7 +1,8 @@
 ---
-title: "Recipe title"
-teluguTitle: ""
-description: "A short description of the recipe."
+title:
+  en: "Recipe title"
+description:
+  en: "A short description of the recipe."
 publishedDate: 2026-09-06
 updatedDate:
 category: "Chicken"
@@ -19,15 +20,17 @@ servings: 4
 difficulty: "Easy"
 cuisine: "Indian"
 ingredients:
-  - item: "Chicken"
-    quantity: "500 g"
-  - item: "Onion"
-    quantity: "2"
+  - quantity: "500 g"
+    en: "Chicken"
+    te: "చికెన్"
+  - quantity: "2"
+    en: "Onion"
+    te: "ఉల్లిపాయలు"
 instructions:
-  - "Write the first step."
-  - "Write the next step."
+  - en: "Write the first step."
+  - en: "Write the next step."
 tips:
-  - "Add an optional tip."
+  - en: "Add an optional tip."
 ---
 
-Write the recipe story or extra notes here.
+Write the recipe story or extra notes here. Telugu fields are optional and can be added later.

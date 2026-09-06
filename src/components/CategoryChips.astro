@@ -1,0 +1,34 @@
+---
+import { recipeCategoryDefs, t, type CategoryDef, type Locale } from "../i18n";
+import { localePath } from "../utils/urls";
+
+interface Props {
+  locale: Locale;
+  slugs: string[];
+}
+
+const { locale, slugs } = Astro.props;
+const copy = t(locale);
+const chips: CategoryDef[] = recipeCategoryDefs.filter((item) => slugs.includes(item.slug));
+---
+
+{
+  chips.length > 0 && (
+    <div class="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">
+      <a
+        href={localePath(locale, "/recipes/")}
+        class="shrink-0 rounded-full bg-ink px-4 py-2 text-sm font-medium text-white"
+      >
+        {copy.common.allRecipes}
+      </a>
+      {chips.map((chip) => (
+        <a
+          href={localePath(locale, `/recipes/category/${chip.slug}/`)}
+          class="shrink-0 rounded-full border border-line bg-white px-4 py-2 text-sm font-medium hover:border-accent"
+        >
+          {locale === "te" ? chip.te : chip.en}
+        </a>
+      ))}
+    </div>
+  )
+}

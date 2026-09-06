@@ -1,11 +1,13 @@
 ---
 import { siteConfig } from "../config/site";
+import { localeOg, otherLocale, type Locale } from "../i18n";
 import { resolveOgImage } from "../utils/seo";
-import { getCanonicalUrl } from "../utils/urls";
+import { getCanonicalUrl, localePath, stripLocale } from "../utils/urls";
 
 interface Props {
   title: string;
   description: string;
+  locale: Locale;
   image?: string;
   type?: "website" | "article";
   canonicalPath?: string;
@@ -15,23 +17,31 @@ interface Props {
 const {
   title,
   description,
+  locale,
   image,
   type = "website",
   canonicalPath,
   noindex = false,
 } = Astro.props;
 
-const canonical = getCanonicalUrl(canonicalPath ?? Astro.url.pathname);
+const rest = stripLocale(canonicalPath ?? Astro.url.pathname);
+const canonical = getCanonicalUrl(localePath(locale, rest));
+const enUrl = getCanonicalUrl(localePath("en", rest));
+const teUrl = getCanonicalUrl(localePath("te", rest));
 const ogImage = resolveOgImage(image);
 ---
 
 <title>{title}</title>
 <meta name="description" content={description} />
 <link rel="canonical" href={canonical} />
+<link rel="alternate" hreflang="en" href={enUrl} />
+<link rel="alternate" hreflang="te" href={teUrl} />
+<link rel="alternate" hreflang="x-default" href={enUrl} />
 {noindex && <meta name="robots" content="noindex, nofollow" />}
 <meta property="og:type" content={type} />
 <meta property="og:site_name" content={siteConfig.name} />
-<meta property="og:locale" content={siteConfig.locale} />
+<meta property="og:locale" content={localeOg[locale]} />
+<meta property="og:locale:alternate" content={localeOg[otherLocale(locale)]} />
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
 <meta property="og:url" content={canonical} />

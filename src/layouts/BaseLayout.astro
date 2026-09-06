@@ -1,13 +1,17 @@
 ---
 import Footer from "../components/Footer.astro";
 import Header from "../components/Header.astro";
+import MobileSubscribeBar from "../components/MobileSubscribeBar.astro";
 import SEO from "../components/SEO.astro";
 import { siteConfig } from "../config/site";
+import { localeHtmlLang, t, type Locale } from "../i18n";
+import { localePath } from "../utils/urls";
 import "../styles/global.css";
 
 interface Props {
   title: string;
   description: string;
+  locale: Locale;
   image?: string;
   type?: "website" | "article";
   canonicalPath?: string;
@@ -17,6 +21,7 @@ interface Props {
 const {
   title,
   description,
+  locale,
   image,
   type = "website",
   canonicalPath,
@@ -24,19 +29,21 @@ const {
 } = Astro.props;
 
 const gaId = siteConfig.googleAnalyticsId;
+const copy = t(locale);
 ---
 
 <!doctype html>
-<html lang={siteConfig.language}>
+<html lang={localeHtmlLang[locale]} class={locale === "te" ? "lang-te" : "lang-en"}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
     <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
-    <link rel="alternate" type="application/rss+xml" title={siteConfig.name} href={`${import.meta.env.BASE_URL}rss.xml`} />
+    <link rel="alternate" type="application/rss+xml" title={siteConfig.name} href={localePath(locale, "/rss.xml")} />
     <SEO
       title={title}
       description={description}
+      locale={locale}
       image={image}
       type={type}
       canonicalPath={canonicalPath}
@@ -57,12 +64,13 @@ const gaId = siteConfig.googleAnalyticsId;
     }
     <slot name="head" />
   </head>
-  <body class="min-h-screen antialiased">
-    <a class="skip-link" href="#main">Skip to content</a>
-    <Header />
+  <body class="min-h-screen bg-cream antialiased">
+    <a class="skip-link" href="#main">{copy.common.skip}</a>
+    <Header locale={locale} />
     <main id="main">
       <slot />
     </main>
-    <Footer />
+    <Footer locale={locale} />
+    <MobileSubscribeBar locale={locale} />
   </body>
 </html>

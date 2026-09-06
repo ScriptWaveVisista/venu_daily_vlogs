@@ -1,9 +1,15 @@
 ---
-title: "Weekend Home Cooking"
-description: "DEMO sample. A food vlog example about cooking at home over the weekend."
+title:
+  en: "Weekend Home Cooking"
+  te: "వారాంతపు ఇంటి వంట"
+description:
+  en: "DEMO sample. A food vlog example about cooking at home over the weekend."
+  te: "డెమో నమూనా. వారాంతంలో ఇంట్లో వంట చేసే ఆహార వ్లాగ్."
 publishedDate: 2026-08-25
 category: "Food"
-location: "Home kitchen"
+location:
+  en: "Home kitchen"
+  te: "ఇంటి వంటగది"
 thumbnail: "/images/vlogs/weekend-cooking.jpg"
 youtubeUrl: ""
 tags:

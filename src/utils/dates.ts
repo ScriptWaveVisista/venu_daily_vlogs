@@ -1,12 +1,12 @@
-const DATE_FORMATTER = new Intl.DateTimeFormat("en-IN", {
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-  timeZone: "Asia/Kolkata",
-});
+import { localeIntl, type Locale } from "../i18n/locales";
 
-export function formatDate(date: Date): string {
-  return DATE_FORMATTER.format(date);
+export function formatDate(date: Date, locale: Locale = "en"): string {
+  return new Intl.DateTimeFormat(localeIntl[locale], {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "Asia/Kolkata",
+  }).format(date);
 }
 
 export function toIsoDate(date: Date): string {

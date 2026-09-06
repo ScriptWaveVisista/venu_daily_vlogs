@@ -24,7 +24,32 @@ body {
   background-color: var(--color-cream);
   color: var(--color-ink);
   font-family: var(--font-sans);
-  line-height: 1.6;
+  line-height: 1.65;
+}
+
+html.lang-te,
+html.lang-te body {
+  line-height: 1.8;
+}
+
+html.lang-te h1,
+html.lang-te h2,
+html.lang-te h3,
+html.lang-te .font-serif {
+  font-family: var(--font-sans);
+  line-height: 1.45;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+body.menu-open .mobile-subscribe {
+  display: none;
 }
 
 :focus-visible {
@@ -93,7 +118,8 @@ body {
 @media print {
   .site-header,
   .site-footer,
-  .no-print {
+  .no-print,
+  .mobile-subscribe {
     display: none !important;
   }
 

@@ -1,9 +1,18 @@
 ---
-import { siteConfig } from "../config/site";
-import ContentLayout from "../layouts/ContentLayout.astro";
-import { pageTitle } from "../utils/seo";
-import { isConfiguredEmail, isConfiguredUrl } from "../utils/urls";
+import { siteConfig } from "../../config/site";
+import { isLocale, localeStaticPaths, t } from "../../i18n";
+import ContentLayout from "../../layouts/ContentLayout.astro";
+import { pageTitle } from "../../utils/seo";
+import { isConfiguredEmail, isConfiguredUrl, localePath } from "../../utils/urls";
 
+export function getStaticPaths() {
+  return localeStaticPaths();
+}
+
+const lang = Astro.params.lang;
+if (!isLocale(lang)) throw new Error("Invalid locale");
+const locale = lang;
+const copy = t(locale);
 const emailReady = isConfiguredEmail(siteConfig.email);
 const youtubeReady = isConfiguredUrl(siteConfig.youtube);
 const instagramReady = isConfiguredUrl(siteConfig.instagram);
@@ -12,39 +21,32 @@ const facebookReady = isConfiguredUrl(siteConfig.facebook);
 ---
 
 <ContentLayout
-  title={pageTitle("Contact")}
-  description={`Contact ${siteConfig.name} for collaborations, recipes and YouTube enquiries.`}
-  canonicalPath="/contact/"
+  title={pageTitle(copy.pages.contactTitle)}
+  description={copy.pages.contactDescription}
+  locale={locale}
+  canonicalPath={localePath(locale, "/contact/")}
 >
   <header class="max-w-3xl">
-    <p class="text-sm font-semibold uppercase tracking-[0.16em] text-accent-deep">Hello</p>
-    <h1 class="mt-3 font-serif text-4xl sm:text-5xl">Contact</h1>
-    <p class="mt-4 text-lg text-muted">
-      This is a static website, so there is no contact form. Use the links below for
-      collaborations and messages.
-    </p>
+    <p class="text-sm font-semibold uppercase tracking-[0.16em] text-accent-deep">{copy.pages.contactEyebrow}</p>
+    <h1 class="mt-3 font-serif text-4xl sm:text-5xl">{copy.pages.contactTitle}</h1>
+    <p class="mt-4 text-lg text-muted">{copy.pages.contactIntro}</p>
   </header>
 
   <div class="mt-10 grid gap-5 md:grid-cols-2">
     <section class="rounded-3xl bg-white p-6">
-      <h2 class="font-serif text-2xl">Business collaborations</h2>
-      <p class="mt-3 text-muted">
-        For brand, recipe or video collaborations, write through email or a social
-        channel once those links are added in <code>src/config/site.ts</code>.
-      </p>
+      <h2 class="font-serif text-2xl">{copy.pages.collaborations}</h2>
+      <p class="mt-3 text-muted">{copy.pages.collaborationsBody}</p>
     </section>
 
     <section class="rounded-3xl bg-white p-6">
-      <h2 class="font-serif text-2xl">Email</h2>
+      <h2 class="font-serif text-2xl">{copy.pages.email}</h2>
       {
         emailReady ? (
           <a href={`mailto:${siteConfig.email}`} class="mt-3 inline-block font-medium text-accent-deep hover:underline">
             {siteConfig.email}
           </a>
         ) : (
-          <p class="mt-3 text-muted">
-            Add <code>email</code> in <code>src/config/site.ts</code>.
-          </p>
+          <p class="mt-3 text-muted">{copy.pages.addEmail}</p>
         )
       }
     </section>
@@ -59,10 +61,10 @@ const facebookReady = isConfiguredUrl(siteConfig.facebook);
             rel="noopener noreferrer"
             class="mt-3 inline-flex items-center gap-1 font-medium text-accent-deep hover:underline"
           >
-            Visit the channel <span aria-hidden="true">↗</span>
+            {copy.pages.visitChannel}
           </a>
         ) : (
-          <p class="mt-3 text-muted">Add your YouTube URL in site configuration.</p>
+          <p class="mt-3 text-muted">{copy.pages.addYoutube}</p>
         )
       }
     </section>
@@ -77,10 +79,10 @@ const facebookReady = isConfiguredUrl(siteConfig.facebook);
             rel="noopener noreferrer"
             class="mt-3 inline-flex items-center gap-1 font-medium text-accent-deep hover:underline"
           >
-            Instagram <span aria-hidden="true">↗</span>
+            Instagram
           </a>
         ) : (
-          <p class="mt-3 text-muted">Add your Instagram URL in site configuration.</p>
+          <p class="mt-3 text-muted">{copy.pages.addInstagram}</p>
         )
       }
     </section>
@@ -95,7 +97,7 @@ const facebookReady = isConfiguredUrl(siteConfig.facebook);
             rel="noopener noreferrer"
             class="mt-3 inline-flex items-center gap-1 font-medium text-accent-deep hover:underline"
           >
-            Message on WhatsApp <span aria-hidden="true">↗</span>
+            WhatsApp
           </a>
         </section>
       )
@@ -111,7 +113,7 @@ const facebookReady = isConfiguredUrl(siteConfig.facebook);
             rel="noopener noreferrer"
             class="mt-3 inline-flex items-center gap-1 font-medium text-accent-deep hover:underline"
           >
-            Facebook <span aria-hidden="true">↗</span>
+            Facebook
           </a>
         </section>
       )

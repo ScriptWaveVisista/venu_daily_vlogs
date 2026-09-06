@@ -1,26 +1,33 @@
 ---
-import { pageTitle } from "../utils/seo";
-import { withBase } from "../utils/urls";
+import { defaultLocale, t } from "../i18n";
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { pageTitle } from "../utils/seo";
+import { localePath } from "../utils/urls";
+
+const locale = defaultLocale;
+const copy = t(locale);
 ---
 
 <BaseLayout
-  title={pageTitle("Page not found")}
-  description="This page could not be found on Venu Daily Vlogs."
+  title={pageTitle("404")}
+  description={copy.pages.notFoundBody}
+  locale={locale}
+  canonicalPath={localePath(locale, "/")}
   noindex
 >
   <section class="mx-auto max-w-3xl px-4 py-24 text-center sm:px-6">
     <p class="text-sm font-semibold uppercase tracking-[0.18em] text-accent-deep">404</p>
-    <h1 class="mt-4 font-serif text-4xl sm:text-5xl">Looks like this page wandered away.</h1>
-    <p class="mt-4 text-lg text-muted">
-      The page you opened is not here. Try the homepage or browse recipes instead.
-    </p>
+    <h1 class="mt-4 font-serif text-4xl sm:text-5xl">{copy.pages.notFoundTitle}</h1>
+    <p class="mt-4 text-lg text-muted">{copy.pages.notFoundBody}</p>
     <div class="mt-8 flex flex-wrap justify-center gap-3">
-      <a href={withBase("/")} class="rounded-full bg-accent px-5 py-3 text-sm font-semibold text-white hover:bg-accent-deep">
-        Go Home
+      <a href={localePath("en", "/")} class="rounded-full bg-accent px-5 py-3 text-sm font-semibold text-white hover:bg-accent-deep">
+        English
       </a>
-      <a href={withBase("/recipes/")} class="rounded-full border border-line bg-white px-5 py-3 text-sm font-semibold hover:border-accent">
-        Browse Recipes
+      <a href={localePath("te", "/")} class="rounded-full border border-line bg-white px-5 py-3 text-sm font-semibold hover:border-accent">
+        తెలుగు
+      </a>
+      <a href={localePath("en", "/recipes/")} class="rounded-full border border-line bg-white px-5 py-3 text-sm font-semibold hover:border-accent">
+        {copy.pages.browseRecipes}
       </a>
     </div>
   </section>

@@ -1,15 +1,15 @@
 import { siteConfig } from "../config/site";
+import type { Locale } from "../i18n/locales";
+import { t } from "../i18n/translations";
 import { absoluteUrl } from "./urls";
 
-export function homeTitle(): string {
-  return `${siteConfig.name} | Food, Recipes & Telugu Lifestyle Videos`;
+export function homeTitle(locale: Locale = "en"): string {
+  return locale === "te"
+    ? `${siteConfig.name} | వంటలు, రెసిపీలు & తెలుగు జీవనశైలి వీడియోలు`
+    : `${siteConfig.name} | Food, Recipes & Telugu Lifestyle Videos`;
 }
 
-export function recipeTitle(title: string, teluguTitle?: string): string {
-  if (teluguTitle) {
-    return `${title} Recipe | ${teluguTitle} | ${siteConfig.name}`;
-  }
-
+export function recipeDocumentTitle(title: string): string {
   return `${title} Recipe | ${siteConfig.name}`;
 }
 
@@ -36,4 +36,8 @@ export function toIsoDuration(value?: string): string | undefined {
   const hours = hoursMatch ? `${hoursMatch[1]}H` : "";
   const minutes = minutesMatch ? `${minutesMatch[1]}M` : "";
   return `PT${hours}${minutes}`;
+}
+
+export function localizedHomeDescription(locale: Locale): string {
+  return t(locale).hero.description;
 }

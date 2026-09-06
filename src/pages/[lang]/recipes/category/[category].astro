@@ -1,0 +1,63 @@
+---
+import EmptyState from "../../../../components/EmptyState.astro";
+import RecipeCard from "../../../../components/RecipeCard.astro";
+import { locales, recipeCategoryLabel, t } from "../../../../i18n";
+import ContentLayout from "../../../../layouts/ContentLayout.astro";
+import {
+  getPublishedRecipes,
+  getRecipeCategories,
+  recipesInCategory,
+} from "../../../../utils/content";
+import { pageTitle } from "../../../../utils/seo";
+import { localePath } from "../../../../utils/urls";
+
+export async function getStaticPaths() {
+  const recipes = await getPublishedRecipes();
+  const categories = getRecipeCategories(recipes);
+
+  return locales.flatMap((lang) =>
+    categories.map((category) => ({
+      params: { lang, category },
+      props: { locale: lang, category },
+    })),
+  );
+}
+
+interface Props {
+  locale: import("../../../../i18n").Locale;
+  category: string;
+}
+
+const { locale, category } = Astro.props;
+const copy = t(locale);
+const recipes = recipesInCategory(await getPublishedRecipes(), category);
+const label = recipeCategoryLabel(category, locale);
+---
+
+<ContentLayout
+  title={pageTitle(`${label}`)}
+  description={`${label} — ${copy.pages.recipesDescription}`}
+  locale={locale}
+  canonicalPath={localePath(locale, `/recipes/category/${category}/`)}
+>
+  <header class="max-w-3xl">
+    <p class="text-sm font-semibold uppercase tracking-[0.16em] text-accent-deep">
+      <a href={localePath(locale, "/recipes/")} class="hover:underline">{copy.nav.recipes}</a>
+    </p>
+    <h1 class="mt-3 font-serif text-4xl sm:text-5xl">{label}</h1>
+  </header>
+
+  {
+    recipes.length > 0 ? (
+      <div class="mt-10 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+        {recipes.map((recipe) => (
+          <RecipeCard recipe={recipe} locale={locale} />
+        ))}
+      </div>
+    ) : (
+      <div class="mt-10">
+        <EmptyState title={copy.common.noRecipes} message={copy.common.noRecipesMessage} />
+      </div>
+    )
+  }
+</ContentLayout>

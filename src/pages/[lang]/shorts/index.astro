@@ -1,0 +1,46 @@
+---
+import EmptyState from "../../../components/EmptyState.astro";
+import ShortCard from "../../../components/ShortCard.astro";
+import { isLocale, localeStaticPaths, t } from "../../../i18n";
+import ContentLayout from "../../../layouts/ContentLayout.astro";
+import { getPublishedShorts } from "../../../utils/content";
+import { pageTitle } from "../../../utils/seo";
+import { localePath } from "../../../utils/urls";
+
+export function getStaticPaths() {
+  return localeStaticPaths();
+}
+
+const lang = Astro.params.lang;
+if (!isLocale(lang)) throw new Error("Invalid locale");
+const locale = lang;
+const copy = t(locale);
+const shorts = await getPublishedShorts();
+---
+
+<ContentLayout
+  title={pageTitle(copy.pages.shortsTitle)}
+  description={copy.pages.shortsDescription}
+  locale={locale}
+  canonicalPath={localePath(locale, "/shorts/")}
+>
+  <header class="max-w-3xl">
+    <p class="text-sm font-semibold uppercase tracking-[0.16em] text-accent-deep">{copy.common.quickWatch}</p>
+    <h1 class="mt-3 font-serif text-4xl sm:text-5xl">{copy.pages.shortsTitle}</h1>
+    <p class="mt-4 text-lg text-muted">{copy.pages.shortsDescription}</p>
+  </header>
+
+  {
+    shorts.length > 0 ? (
+      <div class="mt-10 grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
+        {shorts.map((short) => (
+          <ShortCard short={short} locale={locale} />
+        ))}
+      </div>
+    ) : (
+      <div class="mt-10">
+        <EmptyState title={copy.common.noShorts} message={copy.common.noShortsMessage} />
+      </div>
+    )
+  }
+</ContentLayout>

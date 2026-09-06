@@ -1,8 +1,10 @@
 ---
-title: "Short title"
-description: "A short description of the clip."
+title:
+  en: "Short title"
+description:
+  en: "A short description of the clip."
 publishedDate: 2026-09-06
-category: "Cooking"
+category: "Food"
 tags:
   - shorts
 thumbnail: "/images/shorts/your-short.jpg"

@@ -1,0 +1,253 @@
+---
+import Breadcrumbs from "../../../components/Breadcrumbs.astro";
+import JsonLd from "../../../components/JsonLd.astro";
+import RecipeCard from "../../../components/RecipeCard.astro";
+import ShareButtons from "../../../components/ShareButtons.astro";
+import SmartImage from "../../../components/SmartImage.astro";
+import SubscribeCTA from "../../../components/SubscribeCTA.astro";
+import YouTubeEmbed from "../../../components/YouTubeEmbed.astro";
+import { siteConfig } from "../../../config/site";
+import { locales, recipeCategoryLabel, t, type Locale } from "../../../i18n";
+import ContentLayout from "../../../layouts/ContentLayout.astro";
+import {
+  getPublishedRecipes,
+  ingredientLabel,
+  localizedLine,
+  recipeAltTitle,
+  recipeDescription,
+  recipeTitle,
+  type RecipeEntry,
+} from "../../../utils/content";
+import { formatDate } from "../../../utils/dates";
+import { getRelatedItems } from "../../../utils/related";
+import { breadcrumbJsonLd, recipeJsonLd } from "../../../utils/schema";
+import { recipeDocumentTitle } from "../../../utils/seo";
+import { categorySlug } from "../../../i18n/categories";
+import { localePath } from "../../../utils/urls";
+import { render } from "astro:content";
+
+export async function getStaticPaths() {
+  const recipes = await getPublishedRecipes();
+  return locales.flatMap((lang) =>
+    recipes.map((recipe) => ({
+      params: { lang, slug: recipe.id },
+      props: { recipe, locale: lang },
+    })),
+  );
+}
+
+interface Props {
+  recipe: RecipeEntry;
+  locale: Locale;
+}
+
+const { recipe, locale } = Astro.props;
+const copy = t(locale);
+const recipes = await getPublishedRecipes();
+const related = getRelatedItems(recipe, recipes, 3);
+const { Content } = await render(recipe);
+const title = recipeTitle(recipe, locale);
+const altTitle = recipeAltTitle(recipe, locale);
+const description = recipeDescription(recipe, locale);
+const catSlug = categorySlug(recipe.data.category);
+const pagePath = localePath(locale, `/recipes/${recipe.id}/`);
+const crumbs = [
+  { href: localePath(locale, "/"), label: copy.nav.home },
+  { href: localePath(locale, "/recipes/"), label: copy.nav.recipes },
+  { href: localePath(locale, `/recipes/category/${catSlug}/`), label: recipeCategoryLabel(recipe.data.category, locale) },
+  { href: pagePath, label: title },
+];
+
+const facts = [
+  { label: copy.common.prepTime, value: recipe.data.prepTime },
+  { label: copy.common.cookTime, value: recipe.data.cookTime },
+  { label: copy.common.totalTime, value: recipe.data.totalTime },
+  { label: copy.common.servings, value: recipe.data.servings ? String(recipe.data.servings) : undefined },
+  { label: copy.common.difficulty, value: recipe.data.difficulty },
+  { label: copy.common.cuisine, value: recipe.data.cuisine },
+].filter((fact) => fact.value);
+---
+
+<ContentLayout
+  title={recipeDocumentTitle(title)}
+  description={description}
+  locale={locale}
+  image={recipe.data.thumbnail}
+  canonicalPath={pagePath}
+>
+  <JsonLd schema={[recipeJsonLd(recipe, locale), breadcrumbJsonLd(crumbs)]} />
+
+  <article class="recipe-print">
+    <Breadcrumbs items={crumbs} />
+    <header class="mt-6 max-w-3xl">
+      {recipe.data.demo && (
+        <p class="mb-3 inline-flex rounded-full bg-cream-deep px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-ink">
+          {copy.common.demoRecipe}
+        </p>
+      )}
+      <p class="text-sm font-semibold uppercase tracking-[0.16em] text-accent-deep">
+        {recipeCategoryLabel(recipe.data.category, locale)}
+      </p>
+      <h1 class="mt-3 font-serif text-4xl leading-tight sm:text-5xl">{title}</h1>
+      {altTitle && <p class="mt-3 text-xl text-muted">{altTitle}</p>}
+      <p class="mt-4 text-lg text-muted">{description}</p>
+      <div class="mt-4 flex flex-wrap gap-4 text-sm text-muted">
+        <span>{copy.common.by} {siteConfig.author}</span>
+        <time datetime={recipe.data.publishedDate.toISOString()}>
+          {formatDate(recipe.data.publishedDate, locale)}
+        </time>
+        {
+          recipe.data.updatedDate && (
+            <span>
+              {copy.common.updated} {formatDate(recipe.data.updatedDate, locale)}
+            </span>
+          )
+        }
+      </div>
+    </header>
+
+    <div class="mt-8 overflow-hidden rounded-[1.75rem]">
+      <SmartImage
+        src={recipe.data.thumbnail}
+        alt={title}
+        width={1600}
+        height={1000}
+        priority
+        class="aspect-[16/10] w-full object-cover"
+      />
+    </div>
+
+    {
+      facts.length > 0 && (
+        <dl class="mt-8 grid grid-cols-2 gap-4 rounded-3xl border border-line bg-white p-6 sm:grid-cols-3">
+          {facts.map((fact) => (
+            <div>
+              <dt class="text-xs font-semibold uppercase tracking-[0.14em] text-muted">
+                {fact.label}
+              </dt>
+              <dd class="mt-1 font-medium">{fact.value}</dd>
+            </div>
+          ))}
+        </dl>
+      )
+    }
+
+    <div class="no-print mt-6">
+      <button
+        type="button"
+        class="rounded-full border border-line bg-white px-4 py-2 text-sm font-semibold hover:border-accent"
+        onclick="window.print()"
+      >
+        {copy.common.printRecipe}
+      </button>
+    </div>
+
+    <div class="mt-12 grid gap-12 lg:grid-cols-2">
+      {
+        recipe.data.ingredients.length > 0 && (
+          <section>
+            <h2 class="font-serif text-3xl">{copy.common.ingredients}</h2>
+            <ul class="mt-5 space-y-3">
+              {recipe.data.ingredients.map((ingredient) => (
+                <li>
+                  <label class="flex min-h-11 items-start gap-3 rounded-2xl bg-white px-4 py-3">
+                    <input type="checkbox" class="mt-1 h-4 w-4 accent-orange-500" />
+                    <span>{ingredientLabel(ingredient, locale)}</span>
+                  </label>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
+
+      {
+        recipe.data.instructions.length > 0 && (
+          <section>
+            <h2 class="font-serif text-3xl">{copy.common.instructions}</h2>
+            <ol class="mt-5 space-y-4">
+              {recipe.data.instructions.map((step, index) => (
+                <li class="flex gap-4 rounded-2xl bg-white px-4 py-4">
+                  <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-semibold text-white">
+                    {index + 1}
+                  </span>
+                  <p>{localizedLine(step, locale)}</p>
+                </li>
+              ))}
+            </ol>
+          </section>
+        )
+      }
+    </div>
+
+    {
+      recipe.data.youtubeUrl && (
+        <section class="no-print mt-12">
+          <h2 class="font-serif text-3xl">{copy.common.watchVideo}</h2>
+          <div class="mt-5">
+            <YouTubeEmbed youtubeUrl={recipe.data.youtubeUrl} title={title} />
+          </div>
+        </section>
+      )
+    }
+
+    {
+      recipe.data.tips.length > 0 && (
+        <section class="mt-12 max-w-3xl">
+          <h2 class="font-serif text-3xl">{copy.common.tips}</h2>
+          <ul class="mt-4 list-disc space-y-2 pl-5">
+            {recipe.data.tips.map((tip) => (
+              <li>{localizedLine(tip, locale)}</li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    {
+      recipe.data.notes.length > 0 && (
+        <section class="mt-12 max-w-3xl">
+          <h2 class="font-serif text-3xl">{copy.common.notes}</h2>
+          <ul class="mt-4 list-disc space-y-2 pl-5">
+            {recipe.data.notes.map((note) => (
+              <li>{localizedLine(note, locale)}</li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    <section class="prose-content mt-12">
+      <Content />
+    </section>
+
+    {
+      recipe.data.tags.length > 0 && (
+        <p class="mt-8 text-sm text-muted">
+          {copy.common.tags}: {recipe.data.tags.join(", ")}
+        </p>
+      )
+    }
+
+    <div class="no-print mt-8">
+      <ShareButtons title={title} path={pagePath} />
+    </div>
+  </article>
+
+  {
+    related.length > 0 && (
+      <section class="no-print mt-16">
+        <h2 class="font-serif text-3xl">{copy.common.relatedRecipes}</h2>
+        <div class="mt-6 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+          {related.map((item) => (
+            <RecipeCard recipe={item} locale={locale} />
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  <div class="no-print mt-16">
+    <SubscribeCTA locale={locale} compact />
+  </div>
+</ContentLayout>

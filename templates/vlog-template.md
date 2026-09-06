@@ -1,9 +1,10 @@
 ---
-title: "Vlog title"
-description: "A short description of the vlog."
+title:
+  en: "Vlog title"
+description:
+  en: "A short description of the vlog."
 publishedDate: 2026-09-06
 category: "Family"
-location: ""
 thumbnail: "/images/vlogs/your-vlog.jpg"
 youtubeUrl: ""
 tags:
@@ -14,4 +15,4 @@ draft: false
 demo: false
 ---
 
-Write the vlog story here.
+Write the vlog story here. Telugu fields are optional and can be added later.

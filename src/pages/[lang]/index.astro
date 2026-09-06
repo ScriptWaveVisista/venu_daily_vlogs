@@ -1,0 +1,197 @@
+---
+import CategoryChips from "../../components/CategoryChips.astro";
+import Hero from "../../components/Hero.astro";
+import JsonLd from "../../components/JsonLd.astro";
+import RecipeCard from "../../components/RecipeCard.astro";
+import ShortCard from "../../components/ShortCard.astro";
+import SmartImage from "../../components/SmartImage.astro";
+import SubscribeCTA from "../../components/SubscribeCTA.astro";
+import VlogCard from "../../components/VlogCard.astro";
+import { siteConfig } from "../../config/site";
+import { isLocale, localeStaticPaths, t, type Locale } from "../../i18n";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import {
+  getFeaturedVlog,
+  getLatestHighlight,
+  getPublishedRecipes,
+  getPublishedShorts,
+  getPublishedVlogs,
+  getRecipeCategories,
+  prioritizeFeatured,
+} from "../../utils/content";
+import { websiteJsonLd } from "../../utils/schema";
+import { homeTitle, localizedHomeDescription } from "../../utils/seo";
+import { localePath } from "../../utils/urls";
+
+export function getStaticPaths() {
+  return localeStaticPaths();
+}
+
+const lang = Astro.params.lang;
+if (!isLocale(lang)) {
+  throw new Error("Invalid locale");
+}
+const locale: Locale = lang;
+const copy = t(locale);
+
+const [latest, recipes, vlogs, shorts, featuredVlog] = await Promise.all([
+  getLatestHighlight(locale),
+  getPublishedRecipes(),
+  getPublishedVlogs(),
+  getPublishedShorts(),
+  getFeaturedVlog(locale),
+]);
+
+const latestRecipes = prioritizeFeatured(recipes).slice(0, 6);
+const latestVlogs = prioritizeFeatured(vlogs).slice(0, 4);
+const latestShorts = prioritizeFeatured(shorts).slice(0, 4);
+const categories = getRecipeCategories(recipes);
+const video = featuredVlog;
+---
+
+<BaseLayout
+  title={homeTitle(locale)}
+  description={localizedHomeDescription(locale)}
+  locale={locale}
+  canonicalPath={localePath(locale, "/")}
+>
+  <JsonLd schema={websiteJsonLd(locale)} />
+  <Hero locale={locale} latest={latest} />
+
+  <div class="mx-auto max-w-[1240px] space-y-14 px-4 py-8 sm:space-y-16 sm:px-6 lg:space-y-20">
+    {
+      categories.length > 0 && (
+        <section aria-label={copy.common.browse}>
+          <CategoryChips locale={locale} slugs={categories} />
+        </section>
+      )
+    }
+
+    {
+      latestRecipes.length > 0 && (
+        <section aria-labelledby="latest-recipes-heading">
+          <div class="mb-6 flex items-end justify-between gap-4 sm:mb-8">
+            <div>
+              <p class="text-sm font-semibold uppercase tracking-[0.16em] text-accent-deep">{copy.common.cooking}</p>
+              <h2 id="latest-recipes-heading" class="mt-2 font-serif text-3xl sm:text-4xl">
+                {copy.common.latestRecipes}
+              </h2>
+            </div>
+            <a href={localePath(locale, "/recipes/")} class="shrink-0 text-sm font-semibold text-accent-deep hover:underline">
+              {copy.common.viewAllRecipes} →
+            </a>
+          </div>
+          <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+            {latestRecipes.map((recipe) => (
+              <RecipeCard recipe={recipe} locale={locale} />
+            ))}
+          </div>
+        </section>
+      )
+    }
+
+    {
+      video && (
+        <section aria-labelledby="featured-video-heading" class="overflow-hidden rounded-[1.75rem] border border-line bg-white">
+          <div class="grid lg:grid-cols-2">
+            <a href={video.youtubeUrl || video.href} class="relative block" target={video.youtubeUrl ? "_blank" : undefined} rel={video.youtubeUrl ? "noopener noreferrer" : undefined}>
+              <SmartImage
+                src={video.thumbnail}
+                alt={video.title}
+                width={1280}
+                height={720}
+                class="aspect-video w-full object-cover"
+              />
+              <span class="absolute inset-0 flex items-center justify-center">
+                <span class="flex h-14 w-14 items-center justify-center rounded-full bg-accent text-xl text-white">▶</span>
+              </span>
+            </a>
+            <div class="flex flex-col justify-center p-6 sm:p-10">
+              <p class="text-sm font-semibold uppercase tracking-[0.16em] text-accent-deep">{copy.common.featuredVideo}</p>
+              <h2 id="featured-video-heading" class="mt-3 font-serif text-3xl leading-tight sm:text-4xl">{video.title}</h2>
+              <p class="mt-3 text-muted">{video.description}</p>
+              <a
+                href={video.youtubeUrl || video.href}
+                class="mt-6 inline-flex w-fit min-h-11 items-center rounded-full bg-accent px-5 py-3 text-sm font-semibold text-white hover:bg-accent-deep"
+                target={video.youtubeUrl ? "_blank" : undefined}
+                rel={video.youtubeUrl ? "noopener noreferrer" : undefined}
+              >
+                {video.youtubeUrl ? copy.common.watchOnYoutube : copy.common.readMore}
+              </a>
+            </div>
+          </div>
+        </section>
+      )
+    }
+
+    {
+      latestShorts.length > 0 && (
+        <section aria-labelledby="latest-shorts-heading">
+          <div class="mb-6 flex items-end justify-between gap-4 sm:mb-8">
+            <div>
+              <p class="text-sm font-semibold uppercase tracking-[0.16em] text-accent-deep">{copy.common.quickWatch}</p>
+              <h2 id="latest-shorts-heading" class="mt-2 font-serif text-3xl sm:text-4xl">
+                {copy.common.latestShorts}
+              </h2>
+            </div>
+            <a href={localePath(locale, "/shorts/")} class="shrink-0 text-sm font-semibold text-accent-deep hover:underline">
+              {copy.common.viewAllShorts} →
+            </a>
+          </div>
+          <div class="no-scrollbar -mx-4 flex gap-4 overflow-x-auto px-4 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 xl:grid-cols-4">
+            {latestShorts.map((short) => (
+              <div class="w-40 shrink-0 sm:w-auto">
+                <ShortCard short={short} locale={locale} />
+              </div>
+            ))}
+          </div>
+        </section>
+      )
+    }
+
+    {
+      latestVlogs.length > 0 && (
+        <section aria-labelledby="latest-vlogs-heading">
+          <div class="mb-6 flex items-end justify-between gap-4 sm:mb-8">
+            <div>
+              <p class="text-sm font-semibold uppercase tracking-[0.16em] text-accent-deep">{copy.common.stories}</p>
+              <h2 id="latest-vlogs-heading" class="mt-2 font-serif text-3xl sm:text-4xl">
+                {copy.common.latestVlogs}
+              </h2>
+            </div>
+            <a href={localePath(locale, "/vlogs/")} class="shrink-0 text-sm font-semibold text-accent-deep hover:underline">
+              {copy.common.viewAllVlogs} →
+            </a>
+          </div>
+          <div class="grid gap-6 md:grid-cols-2">
+            {latestVlogs.map((vlog) => (
+              <VlogCard vlog={vlog} locale={locale} />
+            ))}
+          </div>
+        </section>
+      )
+    }
+
+    <section class="grid gap-8 overflow-hidden rounded-[1.75rem] border border-line bg-white p-6 sm:p-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
+      <div>
+        <p class="text-sm font-semibold uppercase tracking-[0.16em] text-accent-deep">{copy.home.aboutEyebrow}</p>
+        <h2 class="mt-3 font-serif text-3xl sm:text-4xl">{copy.home.aboutTitle}</h2>
+        <p class="mt-4 max-w-xl text-muted">{copy.home.aboutBody}</p>
+        <a
+          href={localePath(locale, "/about/")}
+          class="mt-6 inline-flex min-h-11 items-center rounded-full border border-line bg-cream px-5 py-3 text-sm font-semibold hover:border-accent"
+        >
+          {copy.common.learnMore}
+        </a>
+      </div>
+      <div class="flex aspect-[4/3] items-end rounded-[1.5rem] bg-cream-deep p-8">
+        <div>
+          <p class="flex h-14 w-14 items-center justify-center rounded-full bg-accent text-xl font-bold text-white">V</p>
+          <p class="mt-4 font-serif text-2xl">{siteConfig.name}</p>
+        </div>
+      </div>
+    </section>
+
+    <SubscribeCTA locale={locale} />
+  </div>
+</BaseLayout>

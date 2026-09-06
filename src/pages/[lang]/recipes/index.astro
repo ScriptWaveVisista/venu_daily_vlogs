@@ -1,56 +1,61 @@
 ---
-import CategoryFilter from "../../components/CategoryFilter.astro";
-import EmptyState from "../../components/EmptyState.astro";
-import RecipeCard from "../../components/RecipeCard.astro";
-import SearchBar from "../../components/SearchBar.astro";
-import { siteConfig } from "../../config/site";
-import ContentLayout from "../../layouts/ContentLayout.astro";
+import CategoryFilter from "../../../components/CategoryFilter.astro";
+import EmptyState from "../../../components/EmptyState.astro";
+import RecipeCard from "../../../components/RecipeCard.astro";
+import SearchBar from "../../../components/SearchBar.astro";
+import { isLocale, localeStaticPaths, t } from "../../../i18n";
+import ContentLayout from "../../../layouts/ContentLayout.astro";
 import {
   getPublishedRecipes,
   getRecipeCategories,
   recipeSearchText,
-} from "../../utils/content";
-import { pageTitle } from "../../utils/seo";
+} from "../../../utils/content";
+import { pageTitle } from "../../../utils/seo";
+import { localePath } from "../../../utils/urls";
 
+export function getStaticPaths() {
+  return localeStaticPaths();
+}
+
+const lang = Astro.params.lang;
+if (!isLocale(lang)) throw new Error("Invalid locale");
+const locale = lang;
+const copy = t(locale);
 const recipes = await getPublishedRecipes();
 const categories = getRecipeCategories(recipes);
 ---
 
 <ContentLayout
-  title={pageTitle("Recipes")}
-  description="Simple homemade recipes with easy-to-follow ingredients, instructions and video guides."
-  canonicalPath="/recipes/"
+  title={pageTitle(copy.pages.recipesTitle)}
+  description={copy.pages.recipesDescription}
+  locale={locale}
+  canonicalPath={localePath(locale, "/recipes/")}
 >
   <header class="max-w-3xl">
     <p class="text-sm font-semibold uppercase tracking-[0.16em] text-accent-deep">
-      {siteConfig.shortName}
+      {copy.common.cooking}
     </p>
-    <h1 class="mt-3 font-serif text-4xl sm:text-5xl">Recipes</h1>
-    <p class="mt-4 text-lg text-muted">
-      Simple homemade recipes with easy-to-follow ingredients, instructions and video guides.
-    </p>
+    <h1 class="mt-3 font-serif text-4xl sm:text-5xl">{copy.pages.recipesTitle}</h1>
+    <p class="mt-4 text-lg text-muted">{copy.pages.recipesDescription}</p>
   </header>
 
   {
     recipes.length > 0 ? (
       <div class="mt-10 space-y-6">
-        <SearchBar placeholder="Search recipes, ingredients or tags" />
-        <CategoryFilter categories={categories} />
+        <SearchBar placeholder={copy.common.searchRecipes} />
+        <CategoryFilter categories={categories} locale={locale} />
         <div id="recipe-grid" class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
           {recipes.map((recipe) => (
-            <RecipeCard recipe={recipe} searchText={recipeSearchText(recipe)} />
+            <RecipeCard recipe={recipe} locale={locale} searchText={recipeSearchText(recipe)} />
           ))}
         </div>
         <p id="recipe-empty" class="hidden rounded-3xl border border-dashed border-line bg-white px-6 py-12 text-center text-muted">
-          No recipes found. Try another search or category.
+          {copy.common.noRecipesFound}
         </p>
       </div>
     ) : (
       <div class="mt-10">
-        <EmptyState
-          title="No recipes published yet"
-          message="New recipes are coming soon."
-        />
+        <EmptyState title={copy.common.noRecipes} message={copy.common.noRecipesMessage} />
       </div>
     )
   }

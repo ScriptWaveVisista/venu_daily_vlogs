@@ -1,6 +1,10 @@
 ---
-title: "Onion Tadka in 20 Seconds"
-description: "DEMO sample Short. A quick kitchen clip example."
+title:
+  en: "Onion Tadka in 20 Seconds"
+  te: "20 సెకన్లలో ఉల్లిపాయ తాలింపు"
+description:
+  en: "DEMO sample Short. A quick kitchen clip example."
+  te: "డెమో షార్ట్. త్వరిత వంటగది క్లిప్."
 publishedDate: 2026-09-03
 category: "Cooking"
 tags:

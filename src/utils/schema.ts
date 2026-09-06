@@ -1,20 +1,31 @@
 import { siteConfig } from "../config/site";
-import type { RecipeEntry, VlogEntry } from "./content";
+import type { Locale } from "../i18n/locales";
+import { recipeCategoryLabel } from "../i18n/categories";
+import {
+  ingredientLabel,
+  localizedLine,
+  recipeDescription,
+  recipeTitle,
+  vlogDescription,
+  vlogTitle,
+  type RecipeEntry,
+  type VlogEntry,
+} from "./content";
 import { toIsoDate } from "./dates";
 import { toIsoDuration } from "./seo";
-import { absoluteUrl, getSiteOrigin } from "./urls";
+import { absoluteUrl, getCanonicalUrl, localePath } from "./urls";
 import { getYouTubeEmbedUrl } from "./youtube";
 
 type JsonLd = Record<string, unknown>;
 
-export function websiteJsonLd(): JsonLd {
+export function websiteJsonLd(locale: Locale): JsonLd {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: siteConfig.name,
     description: siteConfig.description,
-    url: `${getSiteOrigin()}/`,
-    inLanguage: siteConfig.language,
+    url: getCanonicalUrl(localePath(locale, "/")),
+    inLanguage: locale,
     publisher: {
       "@type": "Person",
       name: siteConfig.author,
@@ -60,11 +71,13 @@ export function videoObjectJsonLd(input: {
   };
 }
 
-export function recipeJsonLd(recipe: RecipeEntry): JsonLd {
+export function recipeJsonLd(recipe: RecipeEntry, locale: Locale): JsonLd {
   const data = recipe.data;
+  const name = recipeTitle(recipe, locale);
+  const description = recipeDescription(recipe, locale);
   const video = videoObjectJsonLd({
-    name: data.title,
-    description: data.description,
+    name,
+    description,
     thumbnailUrl: data.thumbnail,
     uploadDate: data.publishedDate,
     youtubeUrl: data.youtubeUrl,
@@ -73,17 +86,18 @@ export function recipeJsonLd(recipe: RecipeEntry): JsonLd {
   const schema: JsonLd = {
     "@context": "https://schema.org",
     "@type": "Recipe",
-    name: data.title,
-    description: data.description,
+    name,
+    description,
     image: [absoluteUrl(data.thumbnail)],
     author: {
       "@type": "Person",
       name: siteConfig.author,
     },
     datePublished: toIsoDate(data.publishedDate),
-    recipeCategory: data.category,
+    recipeCategory: recipeCategoryLabel(data.category, locale),
     recipeCuisine: data.cuisine,
     keywords: data.tags.join(", "),
+    inLanguage: locale,
   };
 
   if (data.updatedDate) {
@@ -101,7 +115,7 @@ export function recipeJsonLd(recipe: RecipeEntry): JsonLd {
 
   if (data.ingredients.length > 0) {
     schema.recipeIngredient = data.ingredients.map((ingredient) =>
-      [ingredient.quantity, ingredient.item].filter(Boolean).join(" "),
+      ingredientLabel(ingredient, locale),
     );
   }
 
@@ -109,7 +123,7 @@ export function recipeJsonLd(recipe: RecipeEntry): JsonLd {
     schema.recipeInstructions = data.instructions.map((step, index) => ({
       "@type": "HowToStep",
       position: index + 1,
-      text: step,
+      text: localizedLine(step, locale),
     }));
   }
 
@@ -120,10 +134,12 @@ export function recipeJsonLd(recipe: RecipeEntry): JsonLd {
   return schema;
 }
 
-export function vlogJsonLd(vlog: VlogEntry, pageUrl: string): JsonLd {
+export function vlogJsonLd(vlog: VlogEntry, pageUrl: string, locale: Locale): JsonLd {
+  const name = vlogTitle(vlog, locale);
+  const description = vlogDescription(vlog, locale);
   const video = videoObjectJsonLd({
-    name: vlog.data.title,
-    description: vlog.data.description,
+    name,
+    description,
     thumbnailUrl: vlog.data.thumbnail,
     uploadDate: vlog.data.publishedDate,
     youtubeUrl: vlog.data.youtubeUrl,
@@ -132,10 +148,11 @@ export function vlogJsonLd(vlog: VlogEntry, pageUrl: string): JsonLd {
   return {
     "@context": "https://schema.org",
     "@type": "Article",
-    headline: vlog.data.title,
-    description: vlog.data.description,
+    headline: name,
+    description,
     image: [absoluteUrl(vlog.data.thumbnail)],
     datePublished: toIsoDate(vlog.data.publishedDate),
+    inLanguage: locale,
     author: {
       "@type": "Person",
       name: siteConfig.author,

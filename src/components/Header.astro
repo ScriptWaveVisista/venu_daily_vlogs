@@ -1,9 +1,18 @@
 ---
 import { navLinks, siteConfig } from "../config/site";
-import { isConfiguredUrl, stripBase, withBase } from "../utils/urls";
+import { t, type Locale } from "../i18n";
+import { isConfiguredUrl, localePath, stripLocale } from "../utils/urls";
+import LanguageSwitcher from "./LanguageSwitcher.astro";
 
-const currentPath = stripBase(Astro.url.pathname);
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const copy = t(locale);
+const currentPath = stripLocale(Astro.url.pathname);
 const youtubeReady = isConfiguredUrl(siteConfig.youtube);
+const instagramReady = isConfiguredUrl(siteConfig.instagram);
 
 function isActive(href: string): boolean {
   if (href === "/") {
@@ -14,44 +23,45 @@ function isActive(href: string): boolean {
 }
 ---
 
-<header class="site-header sticky top-0 z-50 border-b border-line/80 bg-cream/90 backdrop-blur">
-  <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-    <a href={withBase("/")} class="flex min-w-0 items-center gap-3">
-      <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-bold text-white">
+<header class="site-header sticky top-0 z-50 h-16 border-b border-line/80 bg-cream/90 backdrop-blur">
+  <div class="mx-auto flex h-full max-w-[1240px] items-center justify-between gap-3 px-4 sm:px-6">
+    <a href={localePath(locale, "/")} class="flex min-w-0 items-center gap-2.5">
+      <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-bold text-white">
         V
       </span>
-      <span class="truncate font-serif text-lg leading-tight sm:text-xl">
+      <span class="truncate font-serif text-base leading-tight sm:text-lg">
         {siteConfig.shortName}
       </span>
     </a>
 
-    <nav aria-label="Primary" class="hidden items-center gap-6 lg:flex">
+    <nav aria-label="Primary" class="hidden items-center gap-5 lg:flex">
       {
         navLinks.map((link) => (
           <a
-            href={withBase(link.href)}
+            href={localePath(locale, link.href)}
             class:list={[
               "text-sm font-medium transition hover:text-accent-deep",
-              isActive(link.href) ? "text-accent-deep" : "text-ink",
+              isActive(link.href) ? "text-accent-deep underline decoration-2 underline-offset-8" : "text-ink",
             ]}
             aria-current={isActive(link.href) ? "page" : undefined}
           >
-            {link.label}
+            {copy.nav[link.key]}
           </a>
         ))
       }
     </nav>
 
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-2 sm:gap-3">
+      <LanguageSwitcher locale={locale} />
       {
         youtubeReady && (
           <a
             href={siteConfig.youtube}
             target="_blank"
             rel="noopener noreferrer"
-            class="hidden items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-deep sm:inline-flex"
+            class="hidden items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-deep lg:inline-flex"
           >
-            Subscribe on YouTube
+            {copy.common.subscribe}
             <span aria-hidden="true">↗</span>
             <span class="sr-only"> (opens in a new tab)</span>
           </a>
@@ -64,7 +74,7 @@ function isActive(href: string): boolean {
         aria-expanded="false"
         aria-controls="mobile-nav"
       >
-        <span class="sr-only">Open menu</span>
+        <span class="sr-only">{copy.common.openMenu}</span>
         <span aria-hidden="true" class="text-xl leading-none">☰</span>
       </button>
     </div>
@@ -72,40 +82,64 @@ function isActive(href: string): boolean {
 
   <div id="mobile-nav" class="border-t border-line bg-white px-4 py-4 lg:hidden" hidden>
     <nav aria-label="Mobile">
-      <ul class="flex flex-col gap-2">
+      <ul class="flex flex-col gap-1">
         {
           navLinks.map((link) => (
             <li>
               <a
-                href={withBase(link.href)}
+                href={localePath(locale, link.href)}
                 class:list={[
-                  "block rounded-xl px-3 py-3 text-base font-medium",
+                  "block min-h-11 rounded-xl px-3 py-3 text-base font-medium",
                   isActive(link.href) ? "bg-cream-deep text-accent-deep" : "text-ink",
                 ]}
                 aria-current={isActive(link.href) ? "page" : undefined}
               >
-                {link.label}
+                {copy.nav[link.key]}
               </a>
             </li>
           ))
         }
-        {
-          youtubeReady && (
-            <li>
+      </ul>
+      <div class="mt-4 border-t border-line pt-4">
+        <div class="flex flex-col gap-3">
+          {
+            youtubeReady && (
               <a
                 href={siteConfig.youtube}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-4 py-3 text-sm font-semibold text-white"
+                class="inline-flex min-h-11 items-center justify-center rounded-full bg-accent px-4 py-3 text-sm font-semibold text-white"
               >
-                Subscribe on YouTube
-                <span aria-hidden="true">↗</span>
-                <span class="sr-only"> (opens in a new tab)</span>
+                YouTube
               </a>
-            </li>
-          )
-        }
-      </ul>
+            )
+          }
+          {
+            instagramReady && (
+              <a
+                href={siteConfig.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex min-h-11 items-center justify-center rounded-full border border-line px-4 py-3 text-sm font-semibold"
+              >
+                Instagram
+              </a>
+            )
+          }
+          {
+            youtubeReady && (
+              <a
+                href={siteConfig.youtube}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-ink px-4 py-3 text-sm font-semibold text-white"
+              >
+                {copy.common.subscribe}
+              </a>
+            )
+          }
+        </div>
+      </div>
     </nav>
   </div>
 </header>
@@ -115,14 +149,24 @@ function isActive(href: string): boolean {
   const menu = document.getElementById("mobile-nav");
 
   if (toggle instanceof HTMLButtonElement && menu) {
+    const label = toggle.querySelector(".sr-only");
+    const openLabel = label?.textContent ?? "Open menu";
+    const closeLabel = openLabel.includes("మెనూ") ? "మెనూ మూసివేయండి" : "Close menu";
+
     const setOpen = (open: boolean) => {
       toggle.setAttribute("aria-expanded", String(open));
-      toggle.querySelector(".sr-only")!.textContent = open ? "Close menu" : "Open menu";
+      if (label) label.textContent = open ? closeLabel : openLabel;
       menu.hidden = !open;
+      document.body.classList.toggle("menu-open", open);
+      document.body.classList.toggle("overflow-hidden", open);
     };
 
     toggle.addEventListener("click", () => {
       setOpen(toggle.getAttribute("aria-expanded") !== "true");
+    });
+
+    menu.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", () => setOpen(false));
     });
 
     document.addEventListener("keydown", (event) => {

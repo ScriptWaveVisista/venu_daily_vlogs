@@ -1,203 +1,30 @@
 ---
-import CategoryCard from "../components/CategoryCard.astro";
-import EmptyState from "../components/EmptyState.astro";
-import Hero from "../components/Hero.astro";
-import JsonLd from "../components/JsonLd.astro";
-import RecipeCard from "../components/RecipeCard.astro";
-import ShortCard from "../components/ShortCard.astro";
-import SmartImage from "../components/SmartImage.astro";
-import SubscribeCTA from "../components/SubscribeCTA.astro";
-import VlogCard from "../components/VlogCard.astro";
-import { siteConfig } from "../config/site";
-import BaseLayout from "../layouts/BaseLayout.astro";
-import {
-  getLatestHighlight,
-  getPublishedRecipes,
-  getPublishedShorts,
-  getPublishedVlogs,
-  getRecipeCategories,
-  prioritizeFeatured,
-} from "../utils/content";
-import { formatDate } from "../utils/dates";
-import { websiteJsonLd } from "../utils/schema";
-import { homeTitle } from "../utils/seo";
-import { toSlug } from "../utils/slug";
-import { withBase } from "../utils/urls";
+import { localePath } from "../utils/urls";
 
-const [latest, recipes, vlogs, shorts] = await Promise.all([
-  getLatestHighlight(),
-  getPublishedRecipes(),
-  getPublishedVlogs(),
-  getPublishedShorts(),
-]);
-
-const latestRecipes = prioritizeFeatured(recipes).slice(0, 6);
-const latestVlogs = prioritizeFeatured(vlogs).slice(0, 4);
-const latestShorts = prioritizeFeatured(shorts).slice(0, 6);
-const categories = getRecipeCategories(recipes);
+const en = localePath("en", "/");
+const te = localePath("te", "/");
 ---
 
-<BaseLayout title={homeTitle()} description={siteConfig.description}>
-  <JsonLd schema={websiteJsonLd()} />
-  <Hero latest={latest} />
-
-  <div class="mx-auto max-w-6xl space-y-20 px-4 py-8 sm:px-6">
-    <section id="latest-video" aria-labelledby="latest-video-heading">
-      <div class="mb-8">
-        <p class="text-sm font-semibold uppercase tracking-[0.16em] text-accent-deep">Latest</p>
-        <h2 id="latest-video-heading" class="mt-2 font-serif text-3xl sm:text-4xl">
-          Latest video
-        </h2>
-      </div>
-      {
-        latest ? (
-          <article class="grid gap-8 overflow-hidden rounded-[2rem] border border-line bg-white lg:grid-cols-2">
-            <SmartImage
-              src={latest.thumbnail}
-              alt={latest.title}
-              width={1200}
-              height={800}
-              class="h-full min-h-64 w-full object-cover"
-            />
-            <div class="flex flex-col justify-center p-6 sm:p-10">
-              <p class="text-xs font-semibold uppercase tracking-[0.16em] text-accent-deep">
-                {latest.category}
-              </p>
-              <h3 class="mt-3 font-serif text-3xl leading-tight">{latest.title}</h3>
-              <p class="mt-3 text-muted">{latest.description}</p>
-              <p class="mt-4 text-sm text-muted">
-                <time datetime={latest.publishedDate.toISOString()}>
-                  {formatDate(latest.publishedDate)}
-                </time>
-              </p>
-              <a
-                href={latest.href}
-                class="mt-6 inline-flex w-fit items-center rounded-full bg-accent px-5 py-3 text-sm font-semibold text-white hover:bg-accent-deep"
-              >
-                Watch Video
-              </a>
-            </div>
-          </article>
-        ) : (
-          <EmptyState
-            title="No videos published yet"
-            message="New recipes and vlogs are coming soon."
-          />
-        )
-      }
-    </section>
-
-    <section aria-labelledby="latest-recipes-heading">
-      <div class="mb-8 flex items-end justify-between gap-4">
-        <div>
-          <p class="text-sm font-semibold uppercase tracking-[0.16em] text-accent-deep">Cooking</p>
-          <h2 id="latest-recipes-heading" class="mt-2 font-serif text-3xl sm:text-4xl">
-            Latest Recipes
-          </h2>
-        </div>
-        <a href={withBase("/recipes/")} class="shrink-0 text-sm font-semibold text-accent-deep hover:underline">
-          View All Recipes →
-        </a>
-      </div>
-      {
-        latestRecipes.length > 0 ? (
-          <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-            {latestRecipes.map((recipe) => (
-              <RecipeCard recipe={recipe} />
-            ))}
-          </div>
-        ) : (
-          <EmptyState
-            title="No recipes published yet"
-            message="New recipes are coming soon."
-          />
-        )
-      }
-    </section>
-
-    <section aria-labelledby="recipe-categories-heading">
-      <div class="mb-8">
-        <p class="text-sm font-semibold uppercase tracking-[0.16em] text-accent-deep">Browse</p>
-        <h2 id="recipe-categories-heading" class="mt-2 font-serif text-3xl sm:text-4xl">
-          Recipe categories
-        </h2>
-      </div>
-      {
-        categories.length > 0 ? (
-          <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {categories.map((category) => (
-              <CategoryCard
-                href={withBase(`/recipes/category/${toSlug(category)}/`)}
-                label={category}
-                count={recipes.filter((recipe) => recipe.data.category === category).length}
-              />
-            ))}
-          </div>
-        ) : (
-          <EmptyState
-            title="No categories yet"
-            message="Categories appear automatically after recipes are published."
-          />
-        )
-      }
-    </section>
-
-    <section aria-labelledby="latest-vlogs-heading">
-      <div class="mb-8 flex items-end justify-between gap-4">
-        <div>
-          <p class="text-sm font-semibold uppercase tracking-[0.16em] text-accent-deep">Stories</p>
-          <h2 id="latest-vlogs-heading" class="mt-2 font-serif text-3xl sm:text-4xl">
-            Latest vlogs
-          </h2>
-        </div>
-        <a href={withBase("/vlogs/")} class="shrink-0 text-sm font-semibold text-accent-deep hover:underline">
-          View All Vlogs →
-        </a>
-      </div>
-      {
-        latestVlogs.length > 0 ? (
-          <div class="grid gap-6 md:grid-cols-2">
-            {latestVlogs.map((vlog) => (
-              <VlogCard vlog={vlog} />
-            ))}
-          </div>
-        ) : (
-          <EmptyState
-            title="No vlogs published yet"
-            message="Family, travel and lifestyle videos will appear here."
-          />
-        )
-      }
-    </section>
-
-    <section aria-labelledby="latest-shorts-heading">
-      <div class="mb-8 flex items-end justify-between gap-4">
-        <div>
-          <p class="text-sm font-semibold uppercase tracking-[0.16em] text-accent-deep">Quick watch</p>
-          <h2 id="latest-shorts-heading" class="mt-2 font-serif text-3xl sm:text-4xl">
-            Latest Shorts
-          </h2>
-        </div>
-        <a href={withBase("/shorts/")} class="shrink-0 text-sm font-semibold text-accent-deep hover:underline">
-          View All Shorts →
-        </a>
-      </div>
-      {
-        latestShorts.length > 0 ? (
-          <div class="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
-            {latestShorts.map((short) => (
-              <ShortCard short={short} />
-            ))}
-          </div>
-        ) : (
-          <EmptyState
-            title="No Shorts published yet"
-            message="Short cooking and lifestyle clips will appear here."
-          />
-        )
-      }
-    </section>
-
-    <SubscribeCTA />
-  </div>
-</BaseLayout>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Venu Daily Vlogs</title>
+    <link rel="canonical" href={new URL(en, Astro.site).toString()} />
+    <link rel="alternate" hreflang="en" href={new URL(en, Astro.site).toString()} />
+    <link rel="alternate" hreflang="te" href={new URL(te, Astro.site).toString()} />
+    <link rel="alternate" hreflang="x-default" href={new URL(en, Astro.site).toString()} />
+    <meta http-equiv="refresh" content={`0;url=${en}`} />
+  </head>
+  <body>
+    <p>
+      <a href={en}>English</a>
+      ·
+      <a href={te}>తెలుగు</a>
+    </p>
+    <script is:inline define:vars={{ en, te }}>
+      const preferred = localStorage.getItem("preferredLanguage");
+      location.replace(preferred === "te" ? te : en);
+    </script>
+  </body>
+</html>

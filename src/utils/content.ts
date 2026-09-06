@@ -1,6 +1,8 @@
 import { getCollection, type CollectionEntry } from "astro:content";
-import { toSlug } from "./slug";
-import { withBase } from "./urls";
+import { categorySlug, recipeCategoryLabel, vlogCategoryLabel } from "../i18n/categories";
+import { getLocalizedValue, localizedSearchBlob } from "../i18n/localize";
+import type { Locale } from "../i18n/locales";
+import { localePath } from "./urls";
 
 export type RecipeEntry = CollectionEntry<"recipes">;
 export type VlogEntry = CollectionEntry<"vlogs">;
@@ -8,6 +10,7 @@ export type ShortEntry = CollectionEntry<"shorts">;
 
 export type HighlightItem = {
   title: string;
+  teluguTitle?: string;
   description: string;
   publishedDate: Date;
   category: string;
@@ -70,88 +73,125 @@ export function prioritizeFeatured<T extends { data: { featured?: boolean; publi
 }
 
 export function getRecipeCategories(recipes: RecipeEntry[]): string[] {
-  return [...new Set(recipes.map((recipe) => recipe.data.category))].sort((a, b) =>
-    a.localeCompare(b),
-  );
+  return [...new Set(recipes.map((recipe) => categorySlug(recipe.data.category)))];
 }
 
 export function getVlogCategories(vlogs: VlogEntry[]): string[] {
-  return [...new Set(vlogs.map((vlog) => vlog.data.category))].sort((a, b) =>
-    a.localeCompare(b),
-  );
+  return [...new Set(vlogs.map((vlog) => categorySlug(vlog.data.category)))];
 }
 
 export function recipesInCategory(
   recipes: RecipeEntry[],
-  categorySlug: string,
+  category: string,
 ): RecipeEntry[] {
-  return recipes.filter((recipe) => toSlug(recipe.data.category) === categorySlug);
+  return recipes.filter((recipe) => categorySlug(recipe.data.category) === category);
 }
 
-export function vlogsInCategory(vlogs: VlogEntry[], categorySlug: string): VlogEntry[] {
-  return vlogs.filter((vlog) => toSlug(vlog.data.category) === categorySlug);
+export function vlogsInCategory(vlogs: VlogEntry[], category: string): VlogEntry[] {
+  return vlogs.filter((vlog) => categorySlug(vlog.data.category) === category);
+}
+
+export function recipeTitle(recipe: RecipeEntry, locale: Locale): string {
+  return getLocalizedValue(recipe.data.title, locale, recipe.data.teluguTitle);
+}
+
+export function recipeAltTitle(recipe: RecipeEntry, locale: Locale): string {
+  const primary = recipeTitle(recipe, locale);
+  const other = getLocalizedValue(recipe.data.title, locale === "en" ? "te" : "en", recipe.data.teluguTitle);
+  return other && other !== primary ? other : "";
+}
+
+export function recipeDescription(recipe: RecipeEntry, locale: Locale): string {
+  return getLocalizedValue(recipe.data.description, locale);
+}
+
+export function vlogTitle(vlog: VlogEntry, locale: Locale): string {
+  return getLocalizedValue(vlog.data.title, locale, vlog.data.teluguTitle);
+}
+
+export function vlogDescription(vlog: VlogEntry, locale: Locale): string {
+  return getLocalizedValue(vlog.data.description, locale);
+}
+
+export function shortTitle(short: ShortEntry, locale: Locale): string {
+  return getLocalizedValue(short.data.title, locale, short.data.teluguTitle);
+}
+
+export function shortDescription(short: ShortEntry, locale: Locale): string {
+  return getLocalizedValue(short.data.description, locale);
+}
+
+export function ingredientLabel(
+  ingredient: RecipeEntry["data"]["ingredients"][number],
+  locale: Locale,
+): string {
+  const name = getLocalizedValue(
+    { en: ingredient.en || ingredient.item || "", te: ingredient.te },
+    locale,
+  );
+  return [ingredient.quantity, name].filter(Boolean).join(" ");
+}
+
+export function localizedLine(
+  value: string | { en: string; te?: string },
+  locale: Locale,
+): string {
+  return getLocalizedValue(value, locale);
 }
 
 export function recipeSearchText(recipe: RecipeEntry): string {
   const ingredients = recipe.data.ingredients
-    .map((ingredient) => `${ingredient.item} ${ingredient.quantity ?? ""}`)
+    .map((ingredient) =>
+      [ingredient.quantity, ingredient.item, ingredient.en, ingredient.te].filter(Boolean).join(" "),
+    )
     .join(" ");
 
   return [
-    recipe.data.title,
+    localizedSearchBlob(recipe.data.title),
     recipe.data.teluguTitle ?? "",
-    recipe.data.description,
+    localizedSearchBlob(recipe.data.description),
     recipe.data.category,
+    recipeCategoryLabel(recipe.data.category, "en"),
+    recipeCategoryLabel(recipe.data.category, "te"),
     recipe.data.tags.join(" "),
     ingredients,
+    recipe.data.instructions.map((step) => localizedSearchBlob(step)).join(" "),
   ]
     .join(" ")
     .toLowerCase();
 }
 
-export async function getLatestHighlight(): Promise<HighlightItem | null> {
-  const [recipes, vlogs, shorts] = await Promise.all([
+export async function getLatestHighlight(locale: Locale): Promise<HighlightItem | null> {
+  const [recipes, vlogs] = await Promise.all([
     getPublishedRecipes(),
     getPublishedVlogs(),
-    getPublishedShorts(),
   ]);
 
   const items: HighlightItem[] = [
     ...recipes.map((recipe) => ({
-      title: recipe.data.title,
-      description: recipe.data.description,
+      title: recipeTitle(recipe, locale),
+      teluguTitle: recipeAltTitle(recipe, locale),
+      description: recipeDescription(recipe, locale),
       publishedDate: recipe.data.publishedDate,
-      category: recipe.data.category,
+      category: recipeCategoryLabel(recipe.data.category, locale),
       thumbnail: recipe.data.thumbnail,
-      href: withBase(`/recipes/${recipe.id}/`),
+      href: localePath(locale, `/recipes/${recipe.id}/`),
       youtubeUrl: recipe.data.youtubeUrl,
       kind: "recipe" as const,
       featured: recipe.data.featured,
       demo: recipe.data.demo,
     })),
     ...vlogs.map((vlog) => ({
-      title: vlog.data.title,
-      description: vlog.data.description,
+      title: vlogTitle(vlog, locale),
+      description: vlogDescription(vlog, locale),
       publishedDate: vlog.data.publishedDate,
-      category: vlog.data.category,
+      category: vlogCategoryLabel(vlog.data.category, locale),
       thumbnail: vlog.data.thumbnail,
-      href: withBase(`/vlogs/${vlog.id}/`),
+      href: localePath(locale, `/vlogs/${vlog.id}/`),
       youtubeUrl: vlog.data.youtubeUrl,
       kind: "vlog" as const,
       featured: vlog.data.featured,
       demo: vlog.data.demo,
-    })),
-    ...shorts.map((short) => ({
-      title: short.data.title,
-      description: short.data.description,
-      publishedDate: short.data.publishedDate,
-      category: short.data.category,
-      thumbnail: short.data.thumbnail,
-      href: short.data.youtubeUrl || withBase("/shorts/"),
-      youtubeUrl: short.data.youtubeUrl,
-      kind: "short" as const,
-      featured: short.data.featured,
-      demo: short.data.demo,
     })),
   ];
 
@@ -159,10 +199,30 @@ export async function getLatestHighlight(): Promise<HighlightItem | null> {
     return null;
   }
 
-  const withVideo = items.filter((item) => item.youtubeUrl);
-  const pool = withVideo.length > 0 ? withVideo : items;
-
-  return pool.sort(
-    (left, right) => right.publishedDate.getTime() - left.publishedDate.getTime(),
+  return items.sort(
+    (left, right) =>
+      Number(right.featured) - Number(left.featured) ||
+      right.publishedDate.getTime() - left.publishedDate.getTime(),
   )[0];
+}
+
+export async function getFeaturedVlog(locale: Locale): Promise<HighlightItem | null> {
+  const vlogs = prioritizeFeatured(await getPublishedVlogs());
+  const vlog = vlogs[0];
+  if (!vlog) {
+    return null;
+  }
+
+  return {
+    title: vlogTitle(vlog, locale),
+    description: vlogDescription(vlog, locale),
+    publishedDate: vlog.data.publishedDate,
+    category: vlogCategoryLabel(vlog.data.category, locale),
+    thumbnail: vlog.data.thumbnail,
+    href: localePath(locale, `/vlogs/${vlog.id}/`),
+    youtubeUrl: vlog.data.youtubeUrl,
+    kind: "vlog",
+    featured: vlog.data.featured,
+    demo: vlog.data.demo,
+  };
 }

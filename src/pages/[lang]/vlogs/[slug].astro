@@ -1,0 +1,134 @@
+---
+import Breadcrumbs from "../../../components/Breadcrumbs.astro";
+import JsonLd from "../../../components/JsonLd.astro";
+import ShareButtons from "../../../components/ShareButtons.astro";
+import SmartImage from "../../../components/SmartImage.astro";
+import SubscribeCTA from "../../../components/SubscribeCTA.astro";
+import VlogCard from "../../../components/VlogCard.astro";
+import YouTubeEmbed from "../../../components/YouTubeEmbed.astro";
+import { locales, t, vlogCategoryLabel, type Locale } from "../../../i18n";
+import { categorySlug } from "../../../i18n/categories";
+import { getLocalizedValue } from "../../../i18n/localize";
+import ContentLayout from "../../../layouts/ContentLayout.astro";
+import { getPublishedVlogs, vlogDescription, vlogTitle, type VlogEntry } from "../../../utils/content";
+import { formatDate } from "../../../utils/dates";
+import { getRelatedItems } from "../../../utils/related";
+import { breadcrumbJsonLd, vlogJsonLd } from "../../../utils/schema";
+import { pageTitle } from "../../../utils/seo";
+import { localePath } from "../../../utils/urls";
+import { render } from "astro:content";
+
+export async function getStaticPaths() {
+  const vlogs = await getPublishedVlogs();
+  return locales.flatMap((lang) =>
+    vlogs.map((vlog) => ({
+      params: { lang, slug: vlog.id },
+      props: { vlog, locale: lang },
+    })),
+  );
+}
+
+interface Props {
+  vlog: VlogEntry;
+  locale: Locale;
+}
+
+const { vlog, locale } = Astro.props;
+const copy = t(locale);
+const vlogs = await getPublishedVlogs();
+const related = getRelatedItems(vlog, vlogs, 3);
+const { Content } = await render(vlog);
+const title = vlogTitle(vlog, locale);
+const description = vlogDescription(vlog, locale);
+const location = vlog.data.location ? getLocalizedValue(vlog.data.location, locale) : "";
+const catSlug = categorySlug(vlog.data.category);
+const pagePath = localePath(locale, `/vlogs/${vlog.id}/`);
+const crumbs = [
+  { href: localePath(locale, "/"), label: copy.nav.home },
+  { href: localePath(locale, "/vlogs/"), label: copy.nav.vlogs },
+  { href: localePath(locale, `/vlogs/category/${catSlug}/`), label: vlogCategoryLabel(vlog.data.category, locale) },
+  { href: pagePath, label: title },
+];
+---
+
+<ContentLayout
+  title={pageTitle(title)}
+  description={description}
+  locale={locale}
+  image={vlog.data.thumbnail}
+  canonicalPath={pagePath}
+>
+  <JsonLd schema={[vlogJsonLd(vlog, pagePath, locale), breadcrumbJsonLd(crumbs)]} />
+
+  <article>
+    <Breadcrumbs items={crumbs} />
+    <header class="mt-6 max-w-3xl">
+      {vlog.data.demo && (
+        <p class="mb-3 inline-flex rounded-full bg-cream-deep px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em]">
+          {copy.common.demoVlog}
+        </p>
+      )}
+      <p class="text-sm font-semibold uppercase tracking-[0.16em] text-accent-deep">
+        {vlogCategoryLabel(vlog.data.category, locale)}
+      </p>
+      <h1 class="mt-3 font-serif text-4xl leading-tight sm:text-5xl">{title}</h1>
+      <p class="mt-4 text-lg text-muted">{description}</p>
+      <div class="mt-4 flex flex-wrap gap-4 text-sm text-muted">
+        <time datetime={vlog.data.publishedDate.toISOString()}>
+          {formatDate(vlog.data.publishedDate, locale)}
+        </time>
+        {location && <span>{location}</span>}
+      </div>
+    </header>
+
+    <div class="mt-8 overflow-hidden rounded-[1.75rem]">
+      <SmartImage
+        src={vlog.data.thumbnail}
+        alt={title}
+        width={1600}
+        height={900}
+        priority
+        class="aspect-video w-full object-cover"
+      />
+    </div>
+
+    {
+      vlog.data.youtubeUrl && (
+        <section class="no-print mt-10">
+          <YouTubeEmbed youtubeUrl={vlog.data.youtubeUrl} title={title} />
+        </section>
+      )
+    }
+
+    <section class="prose-content mt-10">
+      <Content />
+    </section>
+
+    {
+      vlog.data.tags.length > 0 && (
+        <p class="mt-8 text-sm text-muted">{copy.common.tags}: {vlog.data.tags.join(", ")}</p>
+      )
+    }
+
+    <div class="no-print mt-8">
+      <ShareButtons title={title} path={pagePath} />
+    </div>
+  </article>
+
+  {
+    related.length > 0 && (
+      <section class="no-print mt-16">
+        <h2 class="font-serif text-3xl">{copy.common.relatedVlogs}</h2>
+        <div class="mt-6 grid gap-6 md:grid-cols-2">
+          {related.map((item) => (
+            <VlogCard vlog={item} locale={locale} />
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  <div class="no-print mt-16">
+    <SubscribeCTA locale={locale} compact />
+  </div>
+</ContentLayout>
