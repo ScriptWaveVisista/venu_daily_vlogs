@@ -11,7 +11,7 @@ tags:
 thumbnail: "/images/recipes/masala-dosa.jpg"
 youtubeUrl: ""
 featured: false
-draft: false
+draft: true
 demo: true
 prepTime: "20 minutes"
 cookTime: "25 minutes"

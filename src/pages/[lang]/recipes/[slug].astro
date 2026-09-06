@@ -69,7 +69,7 @@ const facts = [
 ---
 
 <ContentLayout
-  title={recipeDocumentTitle(title)}
+  title={recipeDocumentTitle(title, locale)}
   description={description}
   locale={locale}
   image={recipe.data.thumbnail}
@@ -185,7 +185,7 @@ const facts = [
         <section class="no-print mt-12">
           <h2 class="font-serif text-3xl">{copy.common.watchVideo}</h2>
           <div class="mt-5">
-            <YouTubeEmbed youtubeUrl={recipe.data.youtubeUrl} title={title} />
+            <YouTubeEmbed youtubeUrl={recipe.data.youtubeUrl} title={`${title} cooking video from ${siteConfig.name}`} />
           </div>
         </section>
       )

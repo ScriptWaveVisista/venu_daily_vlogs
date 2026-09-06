@@ -11,7 +11,7 @@ tags:
 thumbnail: "/images/recipes/vegetable-pulao.jpg"
 youtubeUrl: ""
 featured: false
-draft: false
+draft: true
 demo: true
 prepTime: "15 minutes"
 cookTime: "20 minutes"

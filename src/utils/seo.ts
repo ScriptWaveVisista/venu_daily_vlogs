@@ -9,8 +9,10 @@ export function homeTitle(locale: Locale = "en"): string {
     : `${siteConfig.name} | Food, Recipes & Telugu Lifestyle Videos`;
 }
 
-export function recipeDocumentTitle(title: string): string {
-  return `${title} Recipe | ${siteConfig.name}`;
+export function recipeDocumentTitle(title: string, locale: Locale = "en"): string {
+  return locale === "te"
+    ? `${title} రెసిపీ | ${siteConfig.name}`
+    : `${title} Recipe | ${siteConfig.name}`;
 }
 
 export function pageTitle(title: string): string {
@@ -23,6 +25,11 @@ export function resolveOgImage(image?: string): string {
 
 export function toIsoDuration(value?: string): string | undefined {
   if (!value) {
+    return undefined;
+  }
+
+  // Do not coerce a stated range such as "45–50 minutes" into one ISO duration.
+  if (/(\d+)\s*[–-]\s*(\d+)/.test(value)) {
     return undefined;
   }
 

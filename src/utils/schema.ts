@@ -95,13 +95,16 @@ export function recipeJsonLd(recipe: RecipeEntry, locale: Locale): JsonLd {
     },
     datePublished: toIsoDate(data.publishedDate),
     recipeCategory: recipeCategoryLabel(data.category, locale),
-    recipeCuisine: data.cuisine,
     keywords: data.tags.join(", "),
     inLanguage: locale,
   };
 
   if (data.updatedDate) {
     schema.dateModified = toIsoDate(data.updatedDate);
+  }
+
+  if (data.cuisine) {
+    schema.recipeCuisine = data.cuisine;
   }
 
   const prepTime = toIsoDuration(data.prepTime);

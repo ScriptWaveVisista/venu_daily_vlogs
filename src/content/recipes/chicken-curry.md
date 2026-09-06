@@ -10,8 +10,8 @@ tags:
   - telugu recipe
 thumbnail: "/images/recipes/chicken-curry.jpg"
 youtubeUrl: ""
-featured: true
-draft: false
+featured: false
+draft: true
 demo: true
 prepTime: "20 minutes"
 cookTime: "35 minutes"
